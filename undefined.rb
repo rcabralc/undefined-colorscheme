@@ -220,11 +220,11 @@ end
 Undefined = Scheme.new(
   black = Color::Luv.new(13, 3, 5),
   white = Color::Luv.new(78, 21, 31),
-  red: Color::Luv.new(50, 128, 18),
+  red: Color::Luv.new(52, 128, 18),
   lime: Color::Luv.new(60, 5, 66),
   yellow: Color::Luv.new(65, 50, 45),
   purple: Color::Luv.new(50, 84, -5),
-  orange: Color::Luv.new(55, 103, 39),
+  orange: Color::Luv.new(57, 103, 39),
   cyan: Color::Luv.new(60, -30, 1),
 )
 
