@@ -64,7 +64,7 @@ else
   let s:palette.current = s:palette.light
 endif
 
-<% Undefined.dark.each do |name| %>
+<% Undefined.dark.each do |name, *| %>
   let s:<%= name %> = s:palette.current.<%= name %>
 <% end %>
 

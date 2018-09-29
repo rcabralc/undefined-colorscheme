@@ -122,17 +122,42 @@ class Palette
   include Enumerable
 
   def add(name, color, meta = {})
-    (@palette ||= {}).merge!(name.to_sym => { color: color, meta: meta })
-    define_singleton_method(name) { color }
+    tone = Tone.new(color, meta)
+    (@palette ||= {}).merge!(name.to_sym => tone)
+    define_singleton_method(name) { tone }
   end
 
   def get_color(name)
-    (@palette ||= {}).dig(name.to_sym, :color)
+    (@palette ||= {}).fetch(name.to_sym)
   end
 
   def each(&block)
-    (@palette ||= {}).each do |name, color:, meta:|
-      yield name, color, meta
+    (@palette ||= {}).each(&block)
+  end
+
+  class Tone < SimpleDelegator
+    def initialize(color, background: false, foreground: false, accent: false, alternate: false)
+      @background = background
+      @foreground = foreground
+      @accent = accent
+      @alternate = alternate
+      super(color)
+    end
+
+    def background?
+      @background
+    end
+
+    def foreground?
+      @foreground
+    end
+
+    def accent?
+      @accent
+    end
+
+    def alternate?
+      @alternate
     end
   end
 end
@@ -154,12 +179,8 @@ class Scheme
       dark.add(:"#{name}1", color.blend(@bg, 0.25), accent: true)
       dark.add(:"#{name}2", color.blend(@bg, 0.7))
     end
-    grayscale do |weight, index|
-      dark.add(:"gray#{index}", @bg.blend(@fg, weight))
-      dark.add(:"gray#{index}", @bg.blend(@fg, weight))
-      dark.add(:"gray#{index}", @bg.blend(@fg, weight))
-      dark.add(:"gray#{index}", @bg.blend(@fg, weight))
-      dark.add(:"gray#{index}", @bg.blend(@fg, weight))
+    grayscale do |weight, meta, index|
+      dark.add(:"gray#{index}", @bg.blend(@fg, weight), meta)
     end
     @dark = dark
   end
@@ -175,12 +196,8 @@ class Scheme
       light.add(:"#{name}1", color.blend(@fg, 0.25), accent: true)
       light.add(:"#{name}2", color.blend(@fg, 0.7))
     end
-    grayscale do |weight, index|
-      light.add(:"gray#{index}", @fg.blend(@bg, weight))
-      light.add(:"gray#{index}", @fg.blend(@bg, weight))
-      light.add(:"gray#{index}", @fg.blend(@bg, weight))
-      light.add(:"gray#{index}", @fg.blend(@bg, weight))
-      light.add(:"gray#{index}", @fg.blend(@bg, weight))
+    grayscale do |weight, meta, index|
+      light.add(:"gray#{index}", @fg.blend(@bg, weight), meta)
     end
     @light = light
   end
@@ -188,7 +205,15 @@ class Scheme
 private
 
   def grayscale(&block)
-    [0.05, 0.1, 0.25, 0.38, 0.5].each_with_index(&block)
+    [
+      [0.05, { alternate: true, background: true }],
+      [0.1, {}],
+      [0.25, {}],
+      [0.38, {}],
+      [0.5, { accent: true }]
+    ].each_with_index do |(weight, meta), index|
+      yield weight, meta, index
+    end
   end
 end
 
