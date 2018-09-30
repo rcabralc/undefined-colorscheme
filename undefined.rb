@@ -18,7 +18,7 @@ module Color
     ].freeze
   ).freeze
 
-  class Luv
+  class CIELUV
     include Enumerable
 
     attr_reader :l, :u, :v
@@ -79,7 +79,7 @@ module Color
       y = vary * 100
       x = - (9 * y * varu)/((varu - 4) * varv - varu * varv)
       z = (9 * y - (15 * varv * y) - (varv * x ))/(3 * varv)
-      @xyz = Xyz.new(x, y, z)
+      @xyz = CIEXYZ.new(x, y, z)
     end
 
     def contrast_ratio(other)
@@ -92,7 +92,7 @@ module Color
     end
   end
 
-  class Xyz
+  class CIEXYZ
     include Enumerable
 
     def initialize(x, y, z)
@@ -104,11 +104,11 @@ module Color
     end
 
     def rgb(illuminant)
-      @rgb ||= Rgb.new(*illuminant.rgb_components(*map { |c| c/100.0 }))
+      @rgb ||= CIERGB.new(*illuminant.rgb_components(*map { |c| c/100.0 }))
     end
   end
 
-  class Rgb
+  class CIERGB
     include Enumerable
 
     def initialize(r, g, b, illuminant: D65_2)
@@ -126,13 +126,13 @@ module Color
 
     def srgb
       raise 'cannot convert to sRGB: not D65/2º' unless @illuminant.equal?(D65_2)
-      @srgb ||= SRgb.new(
+      @srgb ||= SRGB.new(
         *map { |c| (c > 0.0031308 ? 1.055 * (c**(1/2.4)) - 0.055 : 12.92 * c) * 255 }
       )
     end
   end
 
-  class SRgb
+  class SRGB
     include Enumerable
 
     def initialize(r, g, b)
@@ -255,14 +255,14 @@ private
 end
 
 Undefined = Scheme.new(
-  black = Color::Luv.new(13, 3, 5),
-  white = Color::Luv.new(78, 21, 31),
-  red: Color::Luv.new(52, 128, 18),
-  lime: Color::Luv.new(60, 5, 66),
-  yellow: Color::Luv.new(65, 50, 45),
-  purple: Color::Luv.new(50, 84, -5),
-  orange: Color::Luv.new(57, 103, 39),
-  cyan: Color::Luv.new(60, -30, 1),
+  black = Color::CIELUV.new(13, 3, 5),
+  white = Color::CIELUV.new(78, 21, 31),
+  red: Color::CIELUV.new(52, 128, 18),
+  lime: Color::CIELUV.new(60, 5, 66),
+  yellow: Color::CIELUV.new(65, 50, 45),
+  purple: Color::CIELUV.new(50, 84, -5),
+  orange: Color::CIELUV.new(57, 103, 39),
+  cyan: Color::CIELUV.new(60, -30, 1),
 )
 
 if $stdout.tty?
