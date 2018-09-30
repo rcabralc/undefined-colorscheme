@@ -51,8 +51,12 @@ module Color
       self.class.new(light.l - @l + dark.l, @u, @v)
     end
 
+    def rgb
+      @rgb ||= xyz.rgb(@illuminant)
+    end
+
     def srgb
-      @srgb ||= xyz.srgb.cap
+      @srgb ||= rgb.srgb.cap
     end
 
     def to_s
@@ -75,7 +79,7 @@ module Color
       y = vary * 100
       x = - (9 * y * varu)/((varu - 4) * varv - varu * varv)
       z = (9 * y - (15 * varv * y) - (varv * x ))/(3 * varv)
-      @xyz = Xyz.new(x, y, z, illuminant: @illuminant)
+      @xyz = Xyz.new(x, y, z)
     end
 
     def contrast_ratio(other)
@@ -84,28 +88,23 @@ module Color
     end
 
     def relative_luminance
-      @relative_luminance ||= xyz.rgb.relative_luminance
+      @relative_luminance ||= rgb.relative_luminance
     end
   end
 
   class Xyz
     include Enumerable
 
-    def initialize(x, y, z, illuminant: D65_2)
+    def initialize(x, y, z)
       @x, @y, @z = x, y, z
-      @illuminant = illuminant
     end
 
     def each(&b)
       [@x, @y, @z].each(&b)
     end
 
-    def srgb
-      @srgb ||= rgb.srgb
-    end
-
-    def rgb
-      @rgb ||= Rgb.new(*@illuminant.rgb_components(*map { |c| c/100.0 }))
+    def rgb(illuminant)
+      @rgb ||= Rgb.new(*illuminant.rgb_components(*map { |c| c/100.0 }))
     end
   end
 
@@ -271,7 +270,7 @@ if $stdout.tty?
     puts([[dark, black, white], [light, white, black]].map do |color, bgcolor, fgcolor|
       br, bg, bb = bgcolor.srgb.map(&:round)
       fr, fg, fb = fgcolor.srgb.map(&:round)
-      rgb = color.xyz.srgb
+      rgb = color.rgb.srgb
       cr, cg, cb = rgb.cap.map(&:round)
       f = format("% 4d,% 4d,% 4d", *rgb.map(&:round))
       c = format("%0.2f:1", bgcolor.contrast_ratio(color))
