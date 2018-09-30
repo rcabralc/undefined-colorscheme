@@ -23,8 +23,9 @@ module Color
 
     attr_reader :l, :u, :v
 
-    def initialize(l, u, v)
+    def initialize(l, u, v, illuminant: D65_2)
       @l, @u, @v = l, u, v
+      @illuminant = illuminant
     end
 
     def each(&b)
@@ -51,14 +52,15 @@ module Color
     end
 
     def srgb
-      @srgb ||= xyz(D65_2).srgb.cap
+      @srgb ||= xyz.srgb.cap
     end
 
     def to_s
       srgb.to_s
     end
 
-    def xyz(illuminant = D65_2)
+    def xyz
+      return @xyz if @xyz
       # Code adapted from http://www.easyrgb.com/en/math.php.
       vary = (@l + 16)/116.0
       if vary**3 > 0.008856
@@ -66,14 +68,14 @@ module Color
       else
         vary = (vary - 16/116.0)/7.787
       end
-      refu = (4 * illuminant.refx)/(illuminant.refx + (15 * illuminant.refy) + (3 * illuminant.refz))
-      refv = (9 * illuminant.refy)/(illuminant.refx + (15 * illuminant.refy) + (3 * illuminant.refz))
+      refu = (4 * @illuminant.refx)/(@illuminant.refx + (15 * @illuminant.refy) + (3 * @illuminant.refz))
+      refv = (9 * @illuminant.refy)/(@illuminant.refx + (15 * @illuminant.refy) + (3 * @illuminant.refz))
       varu = @u/(13.0 * @l) + refu
       varv = @v/(13.0 * @l) + refv
       y = vary * 100
       x = - (9 * y * varu)/((varu - 4) * varv - varu * varv)
       z = (9 * y - (15 * varv * y) - (varv * x ))/(3 * varv)
-      Xyz.new(illuminant, x, y, z)
+      @xyz = Xyz.new(x, y, z, illuminant: @illuminant)
     end
 
     def contrast_ratio(other)
@@ -82,16 +84,16 @@ module Color
     end
 
     def relative_luminance
-      xyz(D65_2).rgb.relative_luminance
+      @relative_luminance ||= xyz.rgb.relative_luminance
     end
   end
 
   class Xyz
     include Enumerable
 
-    def initialize(illuminant, x, y, z)
-      @illuminant = illuminant
+    def initialize(x, y, z, illuminant: D65_2)
       @x, @y, @z = x, y, z
+      @illuminant = illuminant
     end
 
     def each(&b)
@@ -99,7 +101,7 @@ module Color
     end
 
     def srgb
-      rgb.srgb
+      @srgb ||= rgb.srgb
     end
 
     def rgb
@@ -110,8 +112,9 @@ module Color
   class Rgb
     include Enumerable
 
-    def initialize(r, g, b)
+    def initialize(r, g, b, illuminant: D65_2)
       @r, @g, @b = r, g, b
+      @illuminant = illuminant
     end
 
     def each(&b)
@@ -123,8 +126,10 @@ module Color
     end
 
     def srgb
-      rgb = map { |c| c > 0.0031308 ? 1.055 * (c**(1/2.4)) - 0.055 : 12.92 * c }
-      SRgb.new(*rgb.map { |c| c * 255 })
+      raise 'cannot convert to sRGB: not D65/2º' unless @illuminant.equal?(D65_2)
+      @srgb ||= SRgb.new(
+        *map { |c| (c > 0.0031308 ? 1.055 * (c**(1/2.4)) - 0.055 : 12.92 * c) * 255 }
+      )
     end
   end
 
