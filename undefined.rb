@@ -75,6 +75,15 @@ module Color
       z = (9 * y - (15 * varv * y) - (varv * x ))/(3 * varv)
       Xyz.new(illuminant, x, y, z)
     end
+
+    def contrast_ratio(other)
+      l2, l1 = [relative_luminance, other.relative_luminance].sort
+      (l1 + 0.05) / (l2 + 0.05)
+    end
+
+    def relative_luminance
+      xyz(D65_2).rgb.relative_luminance
+    end
   end
 
   class Xyz
@@ -93,8 +102,6 @@ module Color
       rgb.srgb
     end
 
-  private
-
     def rgb
       @rgb ||= Rgb.new(*@illuminant.rgb_components(*map { |c| c/100.0 }))
     end
@@ -109,6 +116,10 @@ module Color
 
     def each(&b)
       [@r, @g, @b].each(&b)
+    end
+
+    def relative_luminance
+      @relative_luminance ||= 0.2126*@r + 0.7152*@g + 0.0722*@b
     end
 
     def srgb
@@ -258,7 +269,8 @@ if $stdout.tty?
       rgb = color.xyz.srgb
       cr, cg, cb = rgb.cap.map(&:round)
       f = format("% 4d,% 4d,% 4d", *rgb.map(&:round))
-      "#{f}:\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb.hex}\x1b[0m" +
+      c = format("%0.2f:1", bgcolor.contrast_ratio(color))
+      "#{f} (#{c}):\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb.hex}\x1b[0m" +
         "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{rgb.hex}\x1b[0m"
     end.join)
   end
