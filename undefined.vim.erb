@@ -32,10 +32,10 @@ endfunction
 
 let s:palette = { 'dark': {}, 'light': {} }
 <% Undefined.dark.each do |name, color| %>
-  let s:palette.dark.<%= name %> = "<%= color.rgb.hex %>"
+  let s:palette.dark.<%= name %> = "<%= color %>"
 <% end %>
 <% Undefined.light.each do |name, color| %>
-  let s:palette.light.<%= name %> = "<%= color.rgb.hex %>"
+  let s:palette.light.<%= name %> = "<%= color %>"
 <% end %>
 
 let g:undefined#palette = s:palette

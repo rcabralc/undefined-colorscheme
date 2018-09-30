@@ -1,10 +1,9 @@
 require 'matrix'
 
 module Color
-  class Illuminant < Struct.new(:refx, :refy, :refz, :linear_srgb_coefficients)
-    def srgb_components(x, y, z)
-      rgb = (linear_srgb_coefficients * Matrix[[x], [y], [z]]).column(0)
-      rgb.map { |c| c > 0.0031308 ? 1.055 * (c**(1 / 2.4)) - 0.055 : 12.92 * c }
+  class Illuminant < Struct.new(:refx, :refy, :refz, :linear_rgb_coefficients)
+    def rgb_components(x, y, z)
+      (linear_rgb_coefficients * Matrix[[x], [y], [z]]).column(0)
     end
   end
 
@@ -51,12 +50,12 @@ module Color
       self.class.new(light.l - @l + dark.l, @u, @v)
     end
 
-    def rgb
-      @rgb ||= xyz(D65_2).rgb.cap
+    def srgb
+      @srgb ||= xyz(D65_2).srgb.cap
     end
 
     def to_s
-      rgb.to_s
+      srgb.to_s
     end
 
     def xyz(illuminant = D65_2)
@@ -90,12 +89,35 @@ module Color
       [@x, @y, @z].each(&b)
     end
 
+    def srgb
+      rgb.srgb
+    end
+
+  private
+
     def rgb
-      Rgb.new(*@illuminant.srgb_components(*map { |c| c/100.0 }).map { |c| c * 255 })
+      @rgb ||= Rgb.new(*@illuminant.rgb_components(*map { |c| c/100.0 }))
     end
   end
 
   class Rgb
+    include Enumerable
+
+    def initialize(r, g, b)
+      @r, @g, @b = r, g, b
+    end
+
+    def each(&b)
+      [@r, @g, @b].each(&b)
+    end
+
+    def srgb
+      rgb = map { |c| c > 0.0031308 ? 1.055 * (c**(1/2.4)) - 0.055 : 12.92 * c }
+      SRgb.new(*rgb.map { |c| c * 255 })
+    end
+  end
+
+  class SRgb
     include Enumerable
 
     def initialize(r, g, b)
@@ -231,9 +253,9 @@ Undefined = Scheme.new(
 if $stdout.tty?
   Undefined.dark.zip(Undefined.light).each do |(_, dark, _), (_, light, _)|
     puts([[dark, black, white], [light, white, black]].map do |color, bgcolor, fgcolor|
-      br, bg, bb = bgcolor.xyz.rgb.cap.map(&:round)
-      fr, fg, fb = fgcolor.xyz.rgb.cap.map(&:round)
-      rgb = color.xyz.rgb
+      br, bg, bb = bgcolor.srgb.map(&:round)
+      fr, fg, fb = fgcolor.srgb.map(&:round)
+      rgb = color.xyz.srgb
       cr, cg, cb = rgb.cap.map(&:round)
       f = format("% 4d,% 4d,% 4d", *rgb.map(&:round))
       "#{f}:\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb.hex}\x1b[0m" +
