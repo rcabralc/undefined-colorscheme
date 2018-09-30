@@ -210,7 +210,7 @@ class Scheme
     @colors.each do |name, color|
       dark.add(:"#{name}0", color, accent: true)
       dark.add(:"#{name}1", color.blend(@bg, 0.25), accent: true)
-      dark.add(:"#{name}2", color.blend(@bg, 0.7))
+      dark.add(:"#{name}2", color.blend(@bg, 0.75), background: true)
     end
     grayscale do |weight, meta, index|
       dark.add(:"gray#{index}", @bg.blend(@fg, weight), meta)
@@ -227,7 +227,7 @@ class Scheme
       color = dark.get_color(:"#{name}0").reflect_l(@bg, @fg)
       light.add(:"#{name}0", color, accent: true)
       light.add(:"#{name}1", color.blend(@fg, 0.25), accent: true)
-      light.add(:"#{name}2", color.blend(@fg, 0.7))
+      light.add(:"#{name}2", color.blend(@fg, 0.75), background: true)
     end
     grayscale do |weight, meta, index|
       light.add(:"gray#{index}", @fg.blend(@bg, weight), meta)
