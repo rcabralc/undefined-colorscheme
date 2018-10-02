@@ -158,6 +158,12 @@ end
 class Palette
   include Enumerable
 
+  def initialize
+    raise ArgumentError, 'a block is required' unless block_given?
+    yield self
+    freeze
+  end
+
   def add(name, color, meta = {})
     tone = Tone.new(color, meta)
     (@palette ||= {}).merge!(name.to_sym => tone)
@@ -207,36 +213,34 @@ class Scheme
   end
 
   def dark
-    return @dark if @dark
-    dark = Palette.new
-    dark.add(:bg, @bg, background: true)
-    dark.add(:fg, @fg, foreground: true)
-    @colors.each do |name, color|
-      dark.add(:"#{name}0", color, accent: true)
-      dark.add(:"#{name}1", color.blend(@bg, 0.25), accent: true)
-      dark.add(:"#{name}2", color.blend(@bg, 0.75), background: true)
+    @dark ||= Palette.new do |dark|
+      dark.add(:bg, @bg, background: true)
+      dark.add(:fg, @fg, foreground: true)
+      @colors.each do |name, color|
+        dark.add(:"#{name}0", color, accent: true)
+        dark.add(:"#{name}1", color.blend(@bg, 0.25), accent: true)
+        dark.add(:"#{name}2", color.blend(@bg, 0.75), background: true)
+      end
+      grayscale do |weight, meta, index|
+        dark.add(:"gray#{index}", @bg.blend(@fg, weight), meta)
+      end
     end
-    grayscale do |weight, meta, index|
-      dark.add(:"gray#{index}", @bg.blend(@fg, weight), meta)
-    end
-    @dark = dark
   end
 
   def light
-    return @light if @light
-    light = Palette.new
-    light.add(:bg, @fg, background: true)
-    light.add(:fg, @bg, foreground: true)
-    @colors.keys.each do |name|
-      color = dark.get_color(:"#{name}0").reflect_l(@bg, @fg)
-      light.add(:"#{name}0", color, accent: true)
-      light.add(:"#{name}1", color.blend(@fg, 0.25), accent: true)
-      light.add(:"#{name}2", color.blend(@fg, 0.75), background: true)
+    @light ||= Palette.new do |light|
+      light.add(:bg, @fg, background: true)
+      light.add(:fg, @bg, foreground: true)
+      @colors.keys.each do |name|
+        color = dark.get_color(:"#{name}0").reflect_l(@bg, @fg)
+        light.add(:"#{name}0", color, accent: true)
+        light.add(:"#{name}1", color.blend(@fg, 0.25), accent: true)
+        light.add(:"#{name}2", color.blend(@fg, 0.75), background: true)
+      end
+      grayscale do |weight, meta, index|
+        light.add(:"gray#{index}", @fg.blend(@bg, weight), meta)
+      end
     end
-    grayscale do |weight, meta, index|
-      light.add(:"gray#{index}", @fg.blend(@bg, weight), meta)
-    end
-    @light = light
   end
 
 private
