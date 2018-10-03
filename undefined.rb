@@ -1,22 +1,46 @@
 require 'matrix'
 
 module Color
-  class Illuminant < Struct.new(:refx, :refy, :refz, :linear_rgb_coefficients)
-    def rgb_components(x, y, z)
-      (linear_rgb_coefficients * Matrix[[x], [y], [z]]).column(0)
+  class Illuminant < Struct.new(:refxyz, :white_point)
+    def refx
+      refxyz[0]
+    end
+
+    def refy
+      refxyz[1]
+    end
+
+    def refz
+      refxyz[2]
+    end
+
+    # Conversion methods adapted from
+    # http://www.ryanjuckett.com/programming/rgb-color-space-conversion/
+
+    def XYZ2RGB_matrix(rgb_primaries)
+      RGB2XYZ_matrix(rgb_primaries).inverse
+    end
+
+    def RGB2XYZ_matrix(rgb_primaries)
+      rxyz = xyz_complete(rgb_primaries.r)
+      gxyz = xyz_complete(rgb_primaries.g)
+      bxyz = xyz_complete(rgb_primaries.b)
+      wXYZ = xyz_complete(white_point) / white_point[1]
+      rgbxyz = Matrix.columns([rxyz, gxyz, bxyz])
+      scale = rgbxyz.inverse * wXYZ
+      rgbxyz * Matrix[[scale[0], 0, 0], [0, scale[1], 0], [0, 0, scale[2]]]
+    end
+
+  private
+
+    def xyz_complete(c)
+      Vector[c[0], c[1], 1 - c[0] - c[1]]
     end
   end
 
   # Reference values obtained from http://www.easyrgb.com/en/math.php and from
-  # https://en.wikipedia.org/wiki/SRGB.
-  D65_2 = Illuminant.new(
-    95.047, 100.0, 108.883,
-    Matrix[
-      [ 3.2406, -1.5372, -0.4986],
-      [-0.9689,  1.8758,  0.0415],
-      [ 0.0557, -0.2040,  1.0570],
-    ].freeze
-  ).freeze
+  # http://www.ryanjuckett.com/programming/rgb-color-space-conversion/
+  D65_2 = Illuminant.new([95.047, 100.0, 108.883], [0.3127, 0.3290]).freeze
 
   class CIELUV
     include Enumerable
@@ -51,16 +75,23 @@ module Color
       self.class.new(light.l - @l + dark.l, @u, @v)
     end
 
-    def rgb
-      @rgb ||= xyz.rgb(@illuminant)
+    def linear_srgb
+      @linear_srgb ||= LinearSRGB.new(*(
+        @illuminant.XYZ2RGB_matrix(LinearSRGB.primaries) *
+        Vector[*xyz.map { |c| c/100.0 }]
+      ))
     end
 
     def srgb
-      @srgb ||= rgb.srgb.cap
+      @srgb ||= linear_srgb.srgb.cap
     end
 
     def to_s
       srgb.to_s
+    end
+
+    def contrast_ratio(other)
+      [xyz.y, other.xyz.y].sort.reverse.map { |y| y + 5.0 }.reduce(&:/)
     end
 
     def xyz
@@ -81,35 +112,30 @@ module Color
       z = (9 * y - (15 * varv * y) - (varv * x ))/(3 * varv)
       @xyz = CIEXYZ.new(x, y, z)
     end
-
-    def contrast_ratio(other)
-      l2, l1 = [relative_luminance, other.relative_luminance].sort
-      (l1 + 0.05) / (l2 + 0.05)
-    end
-
-    def relative_luminance
-      @relative_luminance ||= rgb.relative_luminance
-    end
   end
 
-  class CIEXYZ
+  class CIEXYZ < Struct.new(:x, :y, :z)
     include Enumerable
 
-    def initialize(x, y, z)
-      @x, @y, @z = x, y, z
+    def initialize(*a)
+      super
+      freeze
     end
 
     def each(&b)
-      [@x, @y, @z].each(&b)
-    end
-
-    def rgb(illuminant)
-      @rgb ||= CIERGB.new(*illuminant.rgb_components(*map { |c| c/100.0 }))
+      [x, y, z].each(&b)
     end
   end
 
-  class CIERGB
+  class LinearSRGB
     include Enumerable
+
+    class << self; attr_reader :primaries; end
+    @primaries = Struct.new(:r, :g, :b).new(
+      Vector[0.64, 0.33],
+      Vector[0.30, 0.60],
+      Vector[0.15, 0.06]
+    ).freeze
 
     def initialize(r, g, b, illuminant: D65_2)
       @r, @g, @b = r, g, b
@@ -118,10 +144,6 @@ module Color
 
     def each(&b)
       [@r, @g, @b].each(&b)
-    end
-
-    def relative_luminance
-      @relative_luminance ||= 0.2126*@r + 0.7152*@g + 0.0722*@b
     end
 
     def srgb
@@ -274,7 +296,7 @@ if $stdout.tty?
     puts([[dark, black, white], [light, white, black]].map do |color, bgcolor, fgcolor|
       br, bg, bb = bgcolor.srgb.map(&:round)
       fr, fg, fb = fgcolor.srgb.map(&:round)
-      rgb = color.rgb.srgb
+      rgb = color.linear_srgb.srgb
       cr, cg, cb = rgb.cap.map(&:round)
       f = format("% 4d,% 4d,% 4d", *rgb.map(&:round))
       c = format("%0.2f:1", bgcolor.contrast_ratio(color))
