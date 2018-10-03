@@ -59,9 +59,7 @@ module Color
     def blend(other, weight)
       weight = [0.0, [1.0, weight].min].max
       selfweight = 1.0 - weight
-      self.class.new(@l * selfweight + other.l * weight,
-                     @u * selfweight + other.u * weight,
-                     @v * selfweight + other.v * weight)
+      self.class.new(*zip(other).map { |(c1, c2)| c1 * selfweight + c2 * weight })
     end
 
     def reflect_l(dark, light)
@@ -159,6 +157,12 @@ module Color
       @relative_luminance ||= D65_2.RGB2XYZ_matrix(self.class.primaries)
         .row(1).zip(self).map { |(coeff, coord)| coeff * coord }.reduce(&:+)
     end
+
+    def blend(other, weight)
+      weight = [0.0, [1.0, weight].min].max
+      selfweight = 1.0 - weight
+      self.class.new(*zip(other).map { |(c1, c2)| c1 * selfweight + c2 * weight })
+    end
   end
 
   class SRGB
@@ -181,6 +185,10 @@ module Color
       linear.relative_luminance
     end
 
+    def blend(other, weight)
+      linear.blend(other.linear, weight).srgb
+    end
+
     def cap
       self.class.new(*map { |c| [0.0, [255.0, c].min].max })
     end
@@ -191,7 +199,7 @@ module Color
 
     alias to_s hex
 
-  private
+  protected
 
     def linear
       @linear ||= LinearSRGB.new(
