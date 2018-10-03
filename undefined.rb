@@ -186,22 +186,28 @@ class Palette
     freeze
   end
 
-  def add(name, color, meta = {})
-    tone = Tone.new(color, meta)
-    (@palette ||= {}).merge!(name.to_sym => tone)
+  def add(name, color, index = @palette&.size || 0, **meta)
+    tone = Tone.new(name, color, index, **meta)
+    (@palette ||= []) << tone
     define_singleton_method(name) { tone }
   end
 
-  def get_color(name)
-    (@palette ||= {}).fetch(name.to_sym)
+  def get(name)
+    (@palette ||= []).detect { |tone| tone.name == name }
   end
 
   def each(&block)
-    (@palette ||= {}).each(&block)
+    (@palette ||= []).map { |tone| [tone.name, tone] }.each(&block)
   end
 
   class Tone < SimpleDelegator
-    def initialize(color, background: false, foreground: false, accent: false, alternate: false)
+    attr_reader :name, :index
+
+    def initialize(name, color, index,
+                   background: false, foreground: false,
+                   accent: false, alternate: false)
+      @name = name
+      @index = index
       @background = background
       @foreground = foreground
       @accent = accent
@@ -254,7 +260,7 @@ class Scheme
       light.add(:bg, @fg, background: true)
       light.add(:fg, @bg, foreground: true)
       @colors.keys.each do |name|
-        color = dark.get_color(:"#{name}0").reflect_l(@bg, @fg)
+        color = dark.get(:"#{name}0").reflect_l(@bg, @fg)
         light.add(:"#{name}0", color, accent: true)
         light.add(:"#{name}1", color.blend(@fg, 0.25), accent: true)
         light.add(:"#{name}2", color.blend(@fg, 0.75), background: true)
@@ -293,13 +299,13 @@ Undefined = Scheme.new(
 
 if $stdout.tty?
   Undefined.dark.zip(Undefined.light).each do |(_, dark, _), (_, light, _)|
-    puts([[dark, black, white], [light, white, black]].map do |color, bgcolor, fgcolor|
+    puts([[dark, black, white], [light, white, black]].map do |tone, bgcolor, fgcolor|
       br, bg, bb = bgcolor.srgb.map(&:round)
       fr, fg, fb = fgcolor.srgb.map(&:round)
-      rgb = color.linear_srgb.srgb
+      rgb = tone.linear_srgb.srgb
       cr, cg, cb = rgb.cap.map(&:round)
       f = format("% 4d,% 4d,% 4d", *rgb.map(&:round))
-      c = format("%0.2f:1", bgcolor.contrast_ratio(color))
+      c = format("%0.2f:1", bgcolor.contrast_ratio(tone))
       "#{f} (#{c}):\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb.hex}\x1b[0m" +
         "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{rgb.hex}\x1b[0m"
     end.join)
