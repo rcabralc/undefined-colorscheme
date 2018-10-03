@@ -75,24 +75,20 @@ module Color
       self.class.new(light.l - @l + dark.l, @u, @v)
     end
 
-    def linear_srgb
-      @linear_srgb ||= LinearSRGB.new(*(
-        @illuminant.XYZ2RGB_matrix(LinearSRGB.primaries) *
-        Vector[*xyz.map { |c| c/100.0 }]
-      ))
-    end
-
     def srgb
-      @srgb ||= linear_srgb.srgb.cap
-    end
-
-    def to_s
-      srgb.to_s
+      @srgb ||= linear_srgb.srgb
     end
 
     def contrast_ratio(other)
-      [xyz.y, other.xyz.y].sort.reverse.map { |y| y + 5.0 }.reduce(&:/)
+      [relative_luminance, other.relative_luminance]
+        .sort.reverse.map { |y| y + 0.05 }.reduce(&:/)
     end
+
+    def relative_luminance
+      xyz.y/100.0
+    end
+
+  private
 
     def xyz
       return @xyz if @xyz
@@ -111,6 +107,13 @@ module Color
       x = - (9 * y * varu)/((varu - 4) * varv - varu * varv)
       z = (9 * y - (15 * varv * y) - (varv * x ))/(3 * varv)
       @xyz = CIEXYZ.new(x, y, z)
+    end
+
+    def linear_srgb
+      @linear_srgb ||= LinearSRGB.new(*(
+        @illuminant.XYZ2RGB_matrix(LinearSRGB.primaries) *
+        Vector[*xyz.map { |c| c/100.0 }]
+      ))
     end
   end
 
@@ -137,9 +140,8 @@ module Color
       Vector[0.15, 0.06]
     ).freeze
 
-    def initialize(r, g, b, illuminant: D65_2)
+    def initialize(r, g, b)
       @r, @g, @b = r, g, b
-      @illuminant = illuminant
     end
 
     def each(&b)
@@ -147,22 +149,36 @@ module Color
     end
 
     def srgb
-      raise 'cannot convert to sRGB: not D65/2º' unless @illuminant.equal?(D65_2)
       @srgb ||= SRGB.new(
-        *map { |c| (c > 0.0031308 ? 1.055 * (c**(1/2.4)) - 0.055 : 12.92 * c) * 255 }
+        *map { |c| (c > 0.0031308 ? 1.055 * (c**(1/2.4)) - 0.055 : 12.92 * c) * 255 },
+        linear: self
       )
+    end
+
+    def relative_luminance
+      @relative_luminance ||= D65_2.RGB2XYZ_matrix(self.class.primaries)
+        .row(1).zip(self).map { |(coeff, coord)| coeff * coord }.reduce(&:+)
     end
   end
 
   class SRGB
     include Enumerable
 
-    def initialize(r, g, b)
+    def initialize(r, g, b, linear: nil)
       @r, @g, @b = r, g, b
+      @linear = linear
     end
 
     def each(&b)
       [@r, @g, @b].each(&b)
+    end
+
+    def srgb
+      self
+    end
+
+    def relative_luminance
+      linear.relative_luminance
     end
 
     def cap
@@ -174,6 +190,15 @@ module Color
     end
 
     alias to_s hex
+
+  private
+
+    def linear
+      @linear ||= LinearSRGB.new(
+        *map { |c| c/255.0 }
+        .map { |c| c <= (12.92 * 0.0031308) ? c / 12.92 : ((c + 0.055)/1.055)**2.4 }
+      )
+    end
   end
 end
 
@@ -200,19 +225,37 @@ class Palette
     (@palette ||= []).map { |tone| [tone.name, tone] }.each(&block)
   end
 
-  class Tone < SimpleDelegator
-    attr_reader :name, :index
+  class Tone
+    include Enumerable
+
+    attr_reader :name, :color, :index
 
     def initialize(name, color, index,
                    background: false, foreground: false,
                    accent: false, alternate: false)
       @name = name
+      @color = color
       @index = index
       @background = background
       @foreground = foreground
       @accent = accent
       @alternate = alternate
-      super(color)
+    end
+
+    def srgb
+      @color.srgb.cap
+    end
+
+    def uncapped_srgb
+      @color.srgb
+    end
+
+    def each(&block)
+      srgb.map(&:round).each(&block)
+    end
+
+    def to_s
+      srgb.to_s
     end
 
     def background?
@@ -260,7 +303,7 @@ class Scheme
       light.add(:bg, @fg, background: true)
       light.add(:fg, @bg, foreground: true)
       @colors.keys.each do |name|
-        color = dark.get(:"#{name}0").reflect_l(@bg, @fg)
+        color = dark.get(:"#{name}0").color.reflect_l(@bg, @fg)
         light.add(:"#{name}0", color, accent: true)
         light.add(:"#{name}1", color.blend(@fg, 0.25), accent: true)
         light.add(:"#{name}2", color.blend(@fg, 0.75), background: true)
@@ -300,14 +343,14 @@ Undefined = Scheme.new(
 if $stdout.tty?
   Undefined.dark.zip(Undefined.light).each do |(_, dark, _), (_, light, _)|
     puts([[dark, black, white], [light, white, black]].map do |tone, bgcolor, fgcolor|
-      br, bg, bb = bgcolor.srgb.map(&:round)
-      fr, fg, fb = fgcolor.srgb.map(&:round)
-      rgb = tone.linear_srgb.srgb
-      cr, cg, cb = rgb.cap.map(&:round)
-      f = format("% 4d,% 4d,% 4d", *rgb.map(&:round))
-      c = format("%0.2f:1", bgcolor.contrast_ratio(tone))
-      "#{f} (#{c}):\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb.hex}\x1b[0m" +
-        "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{rgb.hex}\x1b[0m"
+      br, bg, bb = bgcolor.srgb.cap.map(&:round)
+      fr, fg, fb = fgcolor.srgb.cap.map(&:round)
+      rgb = tone.srgb
+      cr, cg, cb = rgb.map(&:round)
+      f = format("% 4d,% 4d,% 4d", *tone.uncapped_srgb.map(&:round))
+      c = format("%0.2f:1", bgcolor.contrast_ratio(rgb))
+      "#{f} (#{c}):\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb}\x1b[0m" +
+        "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{rgb}\x1b[0m"
     end.join)
   end
 end

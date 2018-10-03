@@ -1,5 +1,5 @@
 [ColorEffects:Disabled]
-Color=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
+Color=<%= Undefined.light.bg.to_a.join(',') %>
 ColorAmount=0.65
 ColorEffect=2
 ContrastAmount=0.65
@@ -19,88 +19,88 @@ IntensityAmount=0
 IntensityEffect=0
 
 [Colors:Button]
-BackgroundAlternate=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
-BackgroundNormal=<%= Undefined.light.gray1.srgb.map(&:round).join(',') %>
-DecorationFocus=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-DecorationHover=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
-ForegroundActive=<%= Undefined.light.orange0.srgb.map(&:round).join(',') %>
-ForegroundInactive=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
-ForegroundLink=<%= Undefined.light.cyan0.srgb.map(&:round).join(',') %>
-ForegroundNegative=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-ForegroundNeutral=<%= Undefined.light.yellow0.srgb.map(&:round).join(',') %>
-ForegroundNormal=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-ForegroundPositive=<%= Undefined.light.lime0.srgb.map(&:round).join(',') %>
-ForegroundVisited=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
+BackgroundAlternate=<%= Undefined.light.bg.to_a.join(',') %>
+BackgroundNormal=<%= Undefined.light.gray1.to_a.join(',') %>
+DecorationFocus=<%= Undefined.light.red0.to_a.join(',') %>
+DecorationHover=<%= Undefined.light.purple0.to_a.join(',') %>
+ForegroundActive=<%= Undefined.light.orange0.to_a.join(',') %>
+ForegroundInactive=<%= Undefined.light.gray4.to_a.join(',') %>
+ForegroundLink=<%= Undefined.light.cyan0.to_a.join(',') %>
+ForegroundNegative=<%= Undefined.light.red0.to_a.join(',') %>
+ForegroundNeutral=<%= Undefined.light.yellow0.to_a.join(',') %>
+ForegroundNormal=<%= Undefined.light.fg.to_a.join(',') %>
+ForegroundPositive=<%= Undefined.light.lime0.to_a.join(',') %>
+ForegroundVisited=<%= Undefined.light.purple0.to_a.join(',') %>
 
 [Colors:Complementary]
-BackgroundAlternate=<%= Undefined.light.gray0.srgb.map(&:round).join(',') %>
-BackgroundNormal=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
-DecorationFocus=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-DecorationHover=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
-ForegroundActive=<%= Undefined.light.orange0.srgb.map(&:round).join(',') %>
-ForegroundInactive=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
-ForegroundLink=<%= Undefined.light.cyan0.srgb.map(&:round).join(',') %>
-ForegroundNegative=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-ForegroundNeutral=<%= Undefined.light.yellow0.srgb.map(&:round).join(',') %>
-ForegroundNormal=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-ForegroundPositive=<%= Undefined.light.lime0.srgb.map(&:round).join(',') %>
-ForegroundVisited=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
+BackgroundAlternate=<%= Undefined.light.gray0.to_a.join(',') %>
+BackgroundNormal=<%= Undefined.light.bg.to_a.join(',') %>
+DecorationFocus=<%= Undefined.light.red0.to_a.join(',') %>
+DecorationHover=<%= Undefined.light.purple0.to_a.join(',') %>
+ForegroundActive=<%= Undefined.light.orange0.to_a.join(',') %>
+ForegroundInactive=<%= Undefined.light.gray4.to_a.join(',') %>
+ForegroundLink=<%= Undefined.light.cyan0.to_a.join(',') %>
+ForegroundNegative=<%= Undefined.light.red0.to_a.join(',') %>
+ForegroundNeutral=<%= Undefined.light.yellow0.to_a.join(',') %>
+ForegroundNormal=<%= Undefined.light.fg.to_a.join(',') %>
+ForegroundPositive=<%= Undefined.light.lime0.to_a.join(',') %>
+ForegroundVisited=<%= Undefined.light.purple0.to_a.join(',') %>
 
 [Colors:Selection]
-BackgroundAlternate=<%= Undefined.light.gray1.srgb.map(&:round).join(',') %>
-BackgroundNormal=<%= Undefined.light.gray0.srgb.map(&:round).join(',') %>
-DecorationFocus=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-DecorationHover=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
-ForegroundActive=<%= Undefined.light.orange0.srgb.map(&:round).join(',') %>
-ForegroundInactive=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
-ForegroundLink=<%= Undefined.light.cyan0.srgb.map(&:round).join(',') %>
-ForegroundNegative=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-ForegroundNeutral=<%= Undefined.light.yellow0.srgb.map(&:round).join(',') %>
-ForegroundNormal=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-ForegroundPositive=<%= Undefined.light.lime0.srgb.map(&:round).join(',') %>
-ForegroundVisited=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
+BackgroundAlternate=<%= Undefined.light.gray1.to_a.join(',') %>
+BackgroundNormal=<%= Undefined.light.gray0.to_a.join(',') %>
+DecorationFocus=<%= Undefined.light.red0.to_a.join(',') %>
+DecorationHover=<%= Undefined.light.purple0.to_a.join(',') %>
+ForegroundActive=<%= Undefined.light.orange0.to_a.join(',') %>
+ForegroundInactive=<%= Undefined.light.gray4.to_a.join(',') %>
+ForegroundLink=<%= Undefined.light.cyan0.to_a.join(',') %>
+ForegroundNegative=<%= Undefined.light.red0.to_a.join(',') %>
+ForegroundNeutral=<%= Undefined.light.yellow0.to_a.join(',') %>
+ForegroundNormal=<%= Undefined.light.fg.to_a.join(',') %>
+ForegroundPositive=<%= Undefined.light.lime0.to_a.join(',') %>
+ForegroundVisited=<%= Undefined.light.purple0.to_a.join(',') %>
 
 [Colors:Tooltip]
-BackgroundAlternate=<%= Undefined.light.gray0.srgb.map(&:round).join(',') %>
-BackgroundNormal=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
-DecorationFocus=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-DecorationHover=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
-ForegroundActive=<%= Undefined.light.orange0.srgb.map(&:round).join(',') %>
-ForegroundInactive=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
-ForegroundLink=<%= Undefined.light.cyan0.srgb.map(&:round).join(',') %>
-ForegroundNegative=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-ForegroundNeutral=<%= Undefined.light.yellow0.srgb.map(&:round).join(',') %>
-ForegroundNormal=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-ForegroundPositive=<%= Undefined.light.lime0.srgb.map(&:round).join(',') %>
-ForegroundVisited=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
+BackgroundAlternate=<%= Undefined.light.gray0.to_a.join(',') %>
+BackgroundNormal=<%= Undefined.light.bg.to_a.join(',') %>
+DecorationFocus=<%= Undefined.light.red0.to_a.join(',') %>
+DecorationHover=<%= Undefined.light.purple0.to_a.join(',') %>
+ForegroundActive=<%= Undefined.light.orange0.to_a.join(',') %>
+ForegroundInactive=<%= Undefined.light.gray4.to_a.join(',') %>
+ForegroundLink=<%= Undefined.light.cyan0.to_a.join(',') %>
+ForegroundNegative=<%= Undefined.light.red0.to_a.join(',') %>
+ForegroundNeutral=<%= Undefined.light.yellow0.to_a.join(',') %>
+ForegroundNormal=<%= Undefined.light.fg.to_a.join(',') %>
+ForegroundPositive=<%= Undefined.light.lime0.to_a.join(',') %>
+ForegroundVisited=<%= Undefined.light.purple0.to_a.join(',') %>
 
 [Colors:View]
-BackgroundAlternate=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
-BackgroundNormal=<%= Undefined.light.bg.blend(Color::CIELUV.new(100, 0, 0), 0.25).srgb.map(&:round).join(',') %>
-DecorationFocus=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-DecorationHover=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
-ForegroundActive=<%= Undefined.light.orange0.srgb.map(&:round).join(',') %>
-ForegroundInactive=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
-ForegroundLink=<%= Undefined.light.cyan0.srgb.map(&:round).join(',') %>
-ForegroundNegative=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-ForegroundNeutral=<%= Undefined.light.yellow0.srgb.map(&:round).join(',') %>
-ForegroundNormal=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-ForegroundPositive=<%= Undefined.light.lime0.srgb.map(&:round).join(',') %>
-ForegroundVisited=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
+BackgroundAlternate=<%= Undefined.light.bg.to_a.join(',') %>
+BackgroundNormal=<%= Undefined.light.bg.color.blend(Color::CIELUV.new(100, 0, 0), 0.25).to_a.join(',') %>
+DecorationFocus=<%= Undefined.light.red0.to_a.join(',') %>
+DecorationHover=<%= Undefined.light.purple0.to_a.join(',') %>
+ForegroundActive=<%= Undefined.light.orange0.to_a.join(',') %>
+ForegroundInactive=<%= Undefined.light.gray4.to_a.join(',') %>
+ForegroundLink=<%= Undefined.light.cyan0.to_a.join(',') %>
+ForegroundNegative=<%= Undefined.light.red0.to_a.join(',') %>
+ForegroundNeutral=<%= Undefined.light.yellow0.to_a.join(',') %>
+ForegroundNormal=<%= Undefined.light.fg.to_a.join(',') %>
+ForegroundPositive=<%= Undefined.light.lime0.to_a.join(',') %>
+ForegroundVisited=<%= Undefined.light.purple0.to_a.join(',') %>
 
 [Colors:Window]
-BackgroundAlternate=<%= Undefined.light.gray0.srgb.map(&:round).join(',') %>
-BackgroundNormal=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
-DecorationFocus=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-DecorationHover=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
-ForegroundActive=<%= Undefined.light.orange0.srgb.map(&:round).join(',') %>
-ForegroundInactive=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
-ForegroundLink=<%= Undefined.light.cyan0.srgb.map(&:round).join(',') %>
-ForegroundNegative=<%= Undefined.light.red0.srgb.map(&:round).join(',') %>
-ForegroundNeutral=<%= Undefined.light.yellow0.srgb.map(&:round).join(',') %>
-ForegroundNormal=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-ForegroundPositive=<%= Undefined.light.lime0.srgb.map(&:round).join(',') %>
-ForegroundVisited=<%= Undefined.light.purple0.srgb.map(&:round).join(',') %>
+BackgroundAlternate=<%= Undefined.light.gray0.to_a.join(',') %>
+BackgroundNormal=<%= Undefined.light.bg.to_a.join(',') %>
+DecorationFocus=<%= Undefined.light.red0.to_a.join(',') %>
+DecorationHover=<%= Undefined.light.purple0.to_a.join(',') %>
+ForegroundActive=<%= Undefined.light.orange0.to_a.join(',') %>
+ForegroundInactive=<%= Undefined.light.gray4.to_a.join(',') %>
+ForegroundLink=<%= Undefined.light.cyan0.to_a.join(',') %>
+ForegroundNegative=<%= Undefined.light.red0.to_a.join(',') %>
+ForegroundNeutral=<%= Undefined.light.yellow0.to_a.join(',') %>
+ForegroundNormal=<%= Undefined.light.fg.to_a.join(',') %>
+ForegroundPositive=<%= Undefined.light.lime0.to_a.join(',') %>
+ForegroundVisited=<%= Undefined.light.purple0.to_a.join(',') %>
 
 [General]
 ColorScheme=UndefinedLight
@@ -111,9 +111,9 @@ shadeSortColumn=true
 contrast=7
 
 [WM]
-activeBackground=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
-activeBlend=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-activeForeground=<%= Undefined.light.fg.srgb.map(&:round).join(',') %>
-inactiveBackground=<%= Undefined.light.bg.srgb.map(&:round).join(',') %>
-inactiveBlend=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
-inactiveForeground=<%= Undefined.light.gray4.srgb.map(&:round).join(',') %>
+activeBackground=<%= Undefined.light.bg.to_a.join(',') %>
+activeBlend=<%= Undefined.light.fg.to_a.join(',') %>
+activeForeground=<%= Undefined.light.fg.to_a.join(',') %>
+inactiveBackground=<%= Undefined.light.bg.to_a.join(',') %>
+inactiveBlend=<%= Undefined.light.gray4.to_a.join(',') %>
+inactiveForeground=<%= Undefined.light.gray4.to_a.join(',') %>
