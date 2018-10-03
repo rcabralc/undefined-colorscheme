@@ -190,11 +190,11 @@ module Color
     end
 
     def cap
-      self.class.new(*map { |c| [0.0, [255.0, c].min].max })
+      self.class.new(*map { |c| [0, [255, c.round].min].max })
     end
 
     def hex
-      @hex ||= format("#%02x%02x%02x", *cap.map(&:round))
+      @hex ||= format("#%02x%02x%02x", *cap)
     end
 
     alias to_s hex
@@ -254,12 +254,8 @@ class Palette
       @color.srgb.cap
     end
 
-    def uncapped_srgb
-      @color.srgb
-    end
-
     def each(&block)
-      srgb.map(&:round).each(&block)
+      srgb.each(&block)
     end
 
     def to_s
@@ -351,11 +347,11 @@ Undefined = Scheme.new(
 if $stdout.tty?
   Undefined.dark.zip(Undefined.light).each do |(_, dark, _), (_, light, _)|
     puts([[dark, black, white], [light, white, black]].map do |tone, bgcolor, fgcolor|
-      br, bg, bb = bgcolor.srgb.cap.map(&:round)
-      fr, fg, fb = fgcolor.srgb.cap.map(&:round)
+      br, bg, bb = bgcolor.srgb.cap.to_a
+      fr, fg, fb = fgcolor.srgb.cap.to_a
       rgb = tone.srgb
-      cr, cg, cb = rgb.map(&:round)
-      f = format("% 4d,% 4d,% 4d", *tone.uncapped_srgb.map(&:round))
+      cr, cg, cb = rgb.to_a
+      f = format("% 4d,% 4d,% 4d", *tone.color.srgb.map(&:round))
       c = format("%0.2f:1", bgcolor.contrast_ratio(rgb))
       "#{f} (#{c}):\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb}\x1b[0m" +
         "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{rgb}\x1b[0m"
