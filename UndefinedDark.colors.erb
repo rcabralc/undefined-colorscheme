@@ -76,7 +76,7 @@ ForegroundVisited=<%= Undefined.dark.purple0.to_a.join(',') %>
 
 [Colors:View]
 BackgroundAlternate=<%= Undefined.dark.bg.to_a.join(',') %>
-BackgroundNormal=<%= Undefined.dark.bg.srgb.blend(Undefined::SRGB.new(0, 0, 0), 0.5).map(&:round).join(',') %>
+BackgroundNormal=<%= Undefined.dark.bg.color.blend(Undefined::CIELUV.new(0, 0, 0), 0.25).srgb.cap.to_a.join(',') %>
 DecorationFocus=<%= Undefined.dark.red0.to_a.join(',') %>
 DecorationHover=<%= Undefined.dark.purple0.to_a.join(',') %>
 ForegroundActive=<%= Undefined.dark.orange0.to_a.join(',') %>
