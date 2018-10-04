@@ -215,6 +215,11 @@ let g:terminal_color_13 = s:purple0
 let g:terminal_color_14 = s:cyan0
 let g:terminal_color_15 = s:fg
 
+" diff filetype
+call s:hl('diffAdded', s:lime0, 'NONE')
+call s:hl('diffChanged', s:yellow0, 'NONE')
+call s:hl('diffRemoved', s:red0, 'NONE')
+
 " Restore background saved.  Must be at the end due to a bug in VIM trying to
 " figuring out automagically if the background set through Normal highlight
 " group is dark or light.
