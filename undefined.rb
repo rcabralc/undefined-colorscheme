@@ -77,13 +77,12 @@ module Color
       @srgb ||= linear_srgb.srgb
     end
 
-    def contrast_ratio(other)
-      [relative_luminance, other.relative_luminance]
-        .sort.reverse.map { |y| y + 0.05 }.reduce(&:/)
-    end
-
     def relative_luminance
       xyz.y/100.0
+    end
+
+    def inspect
+      "CIE L*u*v* (#{to_a.join(',')})"
     end
 
   private
@@ -104,14 +103,13 @@ module Color
       y = vary * 100
       x = - (9 * y * varu)/((varu - 4) * varv - varu * varv)
       z = (9 * y - (15 * varv * y) - (varv * x ))/(3 * varv)
+      x = 0.0 if x.nan?
+      z = 0.0 if z.nan?
       @xyz = CIEXYZ.new(x, y, z)
     end
 
     def linear_srgb
-      @linear_srgb ||= LinearSRGB.new(*(
-        @illuminant.XYZ2RGB_matrix(LinearSRGB.primaries) *
-        Vector[*xyz.map { |c| c/100.0 }]
-      ))
+      @linear_srgb ||= xyz.linear_srgb(@illuminant)
     end
   end
 
@@ -125,6 +123,33 @@ module Color
 
     def each(&b)
       [x, y, z].each(&b)
+    end
+
+    def cieluv(illuminant)
+      # Code adapted from http://www.easyrgb.com/en/math.php.
+      varu = (4 * x) / (x + (15 * y) + (3 * z))
+      varv = (9 * y) / (x + (15 * y) + (3 * z))
+      vary = y/100.0
+      if vary > 0.008856
+        vary = vary**(1/3.0)
+      else
+        vary = 7.787 * vary + 16.0/116.0
+      end
+      refu = (4 * illuminant.refx)/(illuminant.refx + (15 * illuminant.refy) + (3 * illuminant.refz))
+      refv = (9 * illuminant.refy)/(illuminant.refx + (15 * illuminant.refy) + (3 * illuminant.refz))
+      l = 116 * vary - 16
+      u = 13 * l * (varu - refu)
+      v = 13 * l * (varv - refv)
+      u = 0.0 if u.nan?
+      v = 0.0 if v.nan?
+      CIELUV.new(l, u, v, illuminant: illuminant)
+    end
+
+    def linear_srgb(illuminant)
+      LinearSRGB.new(*(
+        illuminant.XYZ2RGB_matrix(LinearSRGB.primaries) *
+        Vector[*map { |c| c/100.0 }]
+      ))
     end
   end
 
@@ -163,6 +188,20 @@ module Color
       selfweight = 1.0 - weight
       self.class.new(*zip(other).map { |(c1, c2)| c1 * selfweight + c2 * weight })
     end
+
+    def cieluv
+      @cieluv ||= xyz.cieluv(D65_2)
+    end
+
+  private
+
+    def xyz
+      CIEXYZ.new(*(
+        D65_2.RGB2XYZ_matrix(LinearSRGB.primaries) *
+        Vector[*self] *
+        100.0
+      ))
+    end
   end
 
   class SRGB
@@ -198,6 +237,10 @@ module Color
     end
 
     alias to_s hex
+
+    def cieluv
+      @cieluv ||= linear.cieluv
+    end
 
   protected
 
@@ -236,11 +279,11 @@ class Palette
   class Tone
     include Enumerable
 
-    attr_reader :name, :color, :index
+    attr_reader :name, :color, :index, :xterm
 
     def initialize(name, color, index,
                    background: false, foreground: false,
-                   accent: false, alternate: false)
+                   accent: false, alternate: false, xterm: nil)
       @name = name
       @color = color
       @index = index
@@ -248,6 +291,7 @@ class Palette
       @foreground = foreground
       @accent = accent
       @alternate = alternate
+      @xterm = xterm
     end
 
     def srgb
@@ -278,6 +322,25 @@ class Palette
       @alternate
     end
   end
+
+  XTERM = Palette.new do |pal|
+    steps = [0, 0x5f, 0x87, 0xaf, 0xdf, 0xff]
+    steps.each_with_index do |red, ri|
+      steps.each_with_index do |green, gi|
+        steps.each_with_index do |blue, bi|
+          index = 16 + ri * 6 * 6 + gi * 6 + bi
+          color = Color::SRGB.new(red, green, blue)
+          pal.add(:"term#{index}", color, index, xterm: index)
+        end
+      end
+    end
+    grayscale = 24.times.reduce([]) { |a, i| a << 8 + i * 10 }
+    grayscale.each_with_index do |step, i|
+      index = 232 + i
+      color = Color::SRGB.new(step, step, step)
+      pal.add(:"term#{index}", color, index, xterm: index)
+    end
+  end
 end
 
 class Scheme
@@ -289,31 +352,37 @@ class Scheme
 
   def dark
     @dark ||= Palette.new do |dark|
-      dark.add(:bg, @bg, background: true)
-      dark.add(:fg, @fg, foreground: true)
+      dark.add(:bg, @bg, background: true, xterm: find_xterm(@bg))
+      dark.add(:fg, @fg, foreground: true, xterm: find_xterm(@fg))
       @colors.each do |name, color|
-        dark.add(:"#{name}0", color, accent: true)
-        dark.add(:"#{name}1", color.blend(@bg, 0.25), accent: true)
-        dark.add(:"#{name}2", color.blend(@bg, 0.75), background: true)
+        color1 = color.blend(@bg, 0.25)
+        color2 = color.blend(@bg, 0.75)
+        dark.add(:"#{name}0", color, accent: true, xterm: find_xterm(color))
+        dark.add(:"#{name}1", color1, accent: true, xterm: find_xterm(color1))
+        dark.add(:"#{name}2", color2, background: true, xterm: find_xterm(color2))
       end
       grayscale do |weight, meta, index|
-        dark.add(:"gray#{index}", @bg.blend(@fg, weight), meta)
+        color = @bg.blend(@fg, weight)
+        dark.add(:"gray#{index}", color, meta.merge(xterm: find_xterm(color)))
       end
     end
   end
 
   def light
     @light ||= Palette.new do |light|
-      light.add(:bg, @fg, background: true)
-      light.add(:fg, @bg, foreground: true)
+      light.add(:bg, @fg, background: true, xterm: find_xterm(@fg))
+      light.add(:fg, @bg, foreground: true, xterm: find_xterm(@bg))
       @colors.keys.each do |name|
         color = dark.get(:"#{name}0").color.reflect_l(@bg, @fg)
-        light.add(:"#{name}0", color, accent: true)
-        light.add(:"#{name}1", color.blend(@fg, 0.25), accent: true)
-        light.add(:"#{name}2", color.blend(@fg, 0.75), background: true)
+        color1 = color.blend(@fg, 0.25)
+        color2 = color.blend(@fg, 0.75)
+        light.add(:"#{name}0", color, accent: true, xterm: find_xterm(color))
+        light.add(:"#{name}1", color1, accent: true, xterm: find_xterm(color1))
+        light.add(:"#{name}2", color2, background: true, xterm: find_xterm(color2))
       end
       grayscale do |weight, meta, index|
-        light.add(:"gray#{index}", @fg.blend(@bg, weight), meta)
+        color = @fg.blend(@bg, weight)
+        light.add(:"gray#{index}", color, meta.merge(xterm: find_xterm(color)))
       end
     end
   end
@@ -329,6 +398,34 @@ private
       [0.5, { accent: true }]
     ].each_with_index do |(weight, meta), index|
       yield weight, meta, index
+    end
+  end
+
+  def find_xterm(color)
+    name, tone = Palette::XTERM.min_by do |(name, tone)|
+      (Vector[*color] - Vector[*tone.color.cieluv]).r
+    end
+    tone.index
+  end
+
+  class ContrastRatio
+    include Comparable
+
+    def initialize(color1, color2)
+      @value = [color1.relative_luminance, color2.relative_luminance]
+        .sort.reverse.map { |y| y + 0.05 }.reduce(&:/)
+    end
+
+    def <=>(other)
+      @value <=> other.to_f
+    end
+
+    def to_f
+      @value
+    end
+
+    def to_s
+      format('%0.2f:1', @value)
     end
   end
 end
@@ -349,12 +446,12 @@ if $stdout.tty?
     puts([[dark, black, white], [light, white, black]].map do |tone, bgcolor, fgcolor|
       br, bg, bb = bgcolor.srgb.cap.to_a
       fr, fg, fb = fgcolor.srgb.cap.to_a
-      rgb = tone.srgb
-      cr, cg, cb = rgb.to_a
+      cr, cg, cb = tone.srgb.to_a
       f = format("% 4d,% 4d,% 4d", *tone.color.srgb.map(&:round))
-      c = format("%0.2f:1", bgcolor.contrast_ratio(rgb))
-      "#{f} (#{c}):\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{rgb}\x1b[0m" +
-        "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{rgb}\x1b[0m"
-    end.join)
+      c = Scheme::ContrastRatio.new(bgcolor, tone.srgb)
+      "#{f} #{c}\x1b[48;5;#{tone.xterm}m #{format("%3d", tone.xterm)} \x1b[0m"\
+        "\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{tone}\x1b[0m"\
+        "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{tone}\x1b[0m"
+    end.join(' '))
   end
 end
