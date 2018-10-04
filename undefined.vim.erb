@@ -31,11 +31,11 @@ endfunction
 " ------------------
 
 let s:palette = { 'dark': {}, 'light': {} }
-<% Undefined.dark.each do |name, color| %>
-  let s:palette.dark.<%= name %> = "<%= color %>"
+<% Undefined.dark.each do |tone| %>
+  let s:palette.dark.<%= tone.name %> = "<%= tone %>"
 <% end %>
-<% Undefined.light.each do |name, color| %>
-  let s:palette.light.<%= name %> = "<%= color %>"
+<% Undefined.light.each do |tone| %>
+  let s:palette.light.<%= tone.name %> = "<%= tone %>"
 <% end %>
 
 let g:undefined#palette = s:palette
@@ -64,7 +64,7 @@ else
   let s:palette.current = s:palette.light
 endif
 
-<% Undefined.dark.each do |name, *| %>
+<% Undefined.dark.map(&:name).each do |name| %>
   let s:<%= name %> = s:palette.current.<%= name %>
 <% end %>
 

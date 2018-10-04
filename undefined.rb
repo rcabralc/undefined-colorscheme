@@ -269,11 +269,11 @@ class Palette
   end
 
   def get(name)
-    (@palette ||= []).detect { |tone| tone.name == name }
+    detect { |tone| tone.name == name }
   end
 
   def each(&block)
-    (@palette ||= []).map { |tone| [tone.name, tone] }.each(&block)
+    (@palette ||= []).each(&block)
   end
 
   class Tone
@@ -402,10 +402,9 @@ private
   end
 
   def find_xterm(color)
-    name, tone = Palette::XTERM.min_by do |(name, tone)|
+    Palette::XTERM.min_by do |tone|
       (Vector[*color] - Vector[*tone.color.cieluv]).r
-    end
-    tone.index
+    end.index
   end
 
   class ContrastRatio
@@ -442,8 +441,9 @@ Undefined = Scheme.new(
 )
 
 if __FILE__ == $0
-  Undefined.dark.zip(Undefined.light).each do |(_, dark, _), (_, light, _)|
-    puts([[dark, black, white], [light, white, black]].map do |tone, bgcolor, fgcolor|
+  Undefined.dark.zip(Undefined.light).each do |dark_tone, light_tone|
+    row = [[dark_tone, black, white], [light_tone, white, black]]
+    puts(row.map do |tone, bgcolor, fgcolor|
       br, bg, bb = bgcolor.srgb.cap.to_a
       fr, fg, fb = fgcolor.srgb.cap.to_a
       cr, cg, cb = tone.srgb.to_a
