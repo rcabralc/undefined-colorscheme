@@ -154,6 +154,9 @@ module Undefined
   end
 
   class LinearSRGB
+    # This class assumes D65 illuminant as the viewing condition.  An
+    # interesting discussion about adapting to other illuminants can be found
+    # in https://ninedegreesbelow.com/photography/srgb-luminance.html.
     include Enumerable
 
     class << self; attr_reader :primaries; end
@@ -323,6 +326,7 @@ module Undefined
     end
   end
 
+  # Values based on those from https://gist.github.com/MicahElliott/719710
   XTERM = Palette.new do |pal|
     steps = [0, 0x5f, 0x87, 0xaf, 0xdf, 0xff]
     steps.each_with_index do |red, ri|
