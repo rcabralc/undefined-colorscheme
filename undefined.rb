@@ -441,7 +441,7 @@ Undefined = Scheme.new(
   cyan: Color::CIELUV.new(60, -30, 1),
 )
 
-if $stdout.tty?
+if __FILE__ == $0
   Undefined.dark.zip(Undefined.light).each do |(_, dark, _), (_, light, _)|
     puts([[dark, black, white], [light, white, black]].map do |tone, bgcolor, fgcolor|
       br, bg, bb = bgcolor.srgb.cap.to_a
