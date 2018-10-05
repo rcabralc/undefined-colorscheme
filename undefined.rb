@@ -282,11 +282,11 @@ module Undefined
   class Tone
     include Enumerable
 
-    attr_reader :name, :color, :index, :xterm
+    attr_reader :name, :color, :index
 
     def initialize(name, color, index,
                   background: false, foreground: false,
-                  accent: false, alternate: false, xterm: nil)
+                  accent: false, alternate: false)
       @name = name
       @color = color
       @index = index
@@ -294,7 +294,6 @@ module Undefined
       @foreground = foreground
       @accent = accent
       @alternate = alternate
-      @xterm = xterm
     end
 
     def srgb
@@ -326,26 +325,6 @@ module Undefined
     end
   end
 
-  # Values based on those from https://gist.github.com/MicahElliott/719710
-  XTERM = Palette.new do |pal|
-    steps = [0, 0x5f, 0x87, 0xaf, 0xdf, 0xff]
-    steps.each_with_index do |red, ri|
-      steps.each_with_index do |green, gi|
-        steps.each_with_index do |blue, bi|
-          index = 16 + ri * 6 * 6 + gi * 6 + bi
-          color = SRGB.new(red, green, blue)
-          pal.add(:"term#{index}", color, index, xterm: index)
-        end
-      end
-    end
-    grayscale = 24.times.reduce([]) { |a, i| a << 8 + i * 10 }
-    grayscale.each_with_index do |step, i|
-      index = 232 + i
-      color = SRGB.new(step, step, step)
-      pal.add(:"term#{index}", color, index, xterm: index)
-    end
-  end
-
   class Scheme
     def initialize(bg, fg, **colors)
       @bg = bg
@@ -355,37 +334,37 @@ module Undefined
 
     def dark
       @dark ||= Palette.new do |dark|
-        dark.add(:bg, @bg, background: true, xterm: find_xterm(@bg))
-        dark.add(:fg, @fg, foreground: true, xterm: find_xterm(@fg))
+        dark.add(:bg, @bg, background: true)
+        dark.add(:fg, @fg, foreground: true)
         @colors.each do |name, color|
           color1 = color.blend(@bg, 0.25)
           color2 = color.blend(@bg, 0.75)
-          dark.add(:"#{name}0", color, accent: true, xterm: find_xterm(color))
-          dark.add(:"#{name}1", color1, accent: true, xterm: find_xterm(color1))
-          dark.add(:"#{name}2", color2, background: true, xterm: find_xterm(color2))
+          dark.add(:"#{name}0", color, accent: true)
+          dark.add(:"#{name}1", color1, accent: true)
+          dark.add(:"#{name}2", color2, background: true)
         end
         grayscale do |weight, meta, index|
           color = @bg.blend(@fg, weight)
-          dark.add(:"gray#{index}", color, meta.merge(xterm: find_xterm(color)))
+          dark.add(:"gray#{index}", color, meta)
         end
       end
     end
 
     def light
       @light ||= Palette.new do |light|
-        light.add(:bg, @fg, background: true, xterm: find_xterm(@fg))
-        light.add(:fg, @bg, foreground: true, xterm: find_xterm(@bg))
+        light.add(:bg, @fg, background: true)
+        light.add(:fg, @bg, foreground: true)
         @colors.keys.each do |name|
           color = dark.get(:"#{name}0").color.reflect_l(@bg, @fg)
           color1 = color.blend(@fg, 0.25)
           color2 = color.blend(@fg, 0.75)
-          light.add(:"#{name}0", color, accent: true, xterm: find_xterm(color))
-          light.add(:"#{name}1", color1, accent: true, xterm: find_xterm(color1))
-          light.add(:"#{name}2", color2, background: true, xterm: find_xterm(color2))
+          light.add(:"#{name}0", color, accent: true)
+          light.add(:"#{name}1", color1, accent: true)
+          light.add(:"#{name}2", color2, background: true)
         end
         grayscale do |weight, meta, index|
           color = @fg.blend(@bg, weight)
-          light.add(:"gray#{index}", color, meta.merge(xterm: find_xterm(color)))
+          light.add(:"gray#{index}", color, meta)
         end
       end
     end
@@ -402,12 +381,6 @@ module Undefined
       ].each_with_index do |(weight, meta), index|
         yield weight, meta, index
       end
-    end
-
-    def find_xterm(color)
-      XTERM.min_by do |tone|
-        (Vector[*color] - Vector[*tone.color.cieluv]).r
-      end.index
     end
   end
 
@@ -469,7 +442,7 @@ if __FILE__ == $0
       cr, cg, cb = tone.srgb.to_a
       f = format("% 4d,% 4d,% 4d", *tone.color.srgb.map(&:round))
       c = Undefined::ContrastRatio.new(bgcolor, tone.srgb)
-      "#{f} #{c}\x1b[48;5;#{tone.xterm}m #{format("%3d", tone.xterm)} \x1b[0m"\
+      "#{f} #{c}"\
         "\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{tone}\x1b[0m"\
         "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{tone}\x1b[0m"
     end.join(' '))
