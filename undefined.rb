@@ -63,13 +63,6 @@ module Undefined
     end
 
     def reflect_l(dark, light)
-      # dark_du = @u - dark.u
-      # dark_dv = @v - dark.v
-      # light_du = @u - light.u
-      # light_dv = @v - light.v
-      # dl = light.l - dark.l
-      # l = (light.l**2 + light_du**2 + light_dv**2 - dark.l**2 - dark_du**2 - dark_dv**2)/2.0/dl
-      # self.class.new(l, @u, @v)
       self.class.new(light.l - @l + dark.l, @u, @v)
     end
 
