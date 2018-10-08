@@ -348,7 +348,7 @@ module Undefined
       @light ||= Palette.new do |light|
         light.add(:bg, @fg, background: true)
         light.add(:fg, @bg, foreground: true)
-        light.add(:altbg, @fg.blend(CIELUV.new(100, 0, 0), 0.25), background: true, alternate: true)
+        light.add(:altbg, @fg.blend(CIELUV.new(100, 0, 0), 0.09), background: true, alternate: true)
         @colors.keys.each do |name|
           color = dark.get(:"#{name}0").color.reflect_l(@bg, @fg)
           color1 = color.blend(@fg, 0.25)
