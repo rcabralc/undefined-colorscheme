@@ -1,0 +1,34 @@
+<%
+    palette = Undefined.public_send(variant)
+%>{
+    "theme": {
+      "font-family": "<%= fontname %>",
+      "font-size": "<%= defined?(fontsize) ? fontsize : '14px' %>",
+      "prompt-font-size": "<%= defined?(promptfontsize) ? promptfontsize : '20px' %>",
+      "entries-preformatted-font-family": "<%= fontname %>",
+      "background-color": "<%= palette.bg %>",
+      "prompt-background-color": "<%= palette.bg %>",
+      "prompt-color": "<%= palette.cyan0 %>",
+      "prompt-over-limit-color": "<%= palette.red0 %>",
+      "input-color": "<%= palette.fg %>",
+      "input-not-found-color": "<%= palette.red0 %>",
+      "input-history-color": "<%= palette.orange0 %>",
+      "counters-color": "<%= palette.lime0 %>",
+      "input-background-color": "<%= palette.bg %>",
+      "entries-background-color-gradient-start": "<%= format("rgba(%d,%d,%d,0)", *palette.bg) %>",
+      "entries-background-color-gradient-end": "<%= format("rgba(%d,%d,%d,1)", *palette.bg) %>",
+      "entries-color": "<%= palette.gray4 %>",
+      "entries-alternate-color": "<%= palette.gray4 %>",
+      "entries-hl-color": "<%= palette.red0 %>",
+      "entries-alternate-hl-color": "<%= palette.red0 %>",
+      "entries-background-color": "<%= palette.altbg %>",
+      "entries-hl-background-color": "<%= palette.altbg %>",
+      "entries-alternate-background-color": "<%= palette.bg %>",
+      "entries-alternate-hl-background-color": "<%= palette.bg %>",
+      "entries-text-shadow": "<%= defined?(textshadow) ? textshadow : '0 2px 6px rgba(0, 0, 0, 0.63)' %>",
+      "selected-entry-color": "<%= palette.fg %>",
+      "selected-entry-hl-color": "<%= palette.red0 %>",
+      "selected-entry-background-color": "<%= palette.gray1 %>",
+      "selected-entry-hl-background-color": "<%= palette.gray1 %>"
+    }
+}

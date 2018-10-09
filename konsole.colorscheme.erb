@@ -1,0 +1,97 @@
+<%
+    palette = Undefined.public_send(variant)
+    description = variant == 'dark' ? 'UndefinedDark' : 'UndefinedLight'
+%>[Background]
+Color=<%= palette.bg.to_a.join(',') %>
+
+[BackgroundFaint]
+Color=<%= palette.bg.to_a.join(',') %>
+
+[BackgroundIntense]
+Color=<%= palette.bg.to_a.join(',') %>
+
+[Color0]
+Color=<%= palette.bg.to_a.join(',') %>
+
+[Color0Faint]
+Color=<%= palette.bg.to_a.join(',') %>
+
+[Color0Intense]
+Color=<%= palette.gray2.to_a.join(',') %>
+
+[Color1]
+Color=<%= palette.red1.to_a.join(',') %>
+
+[Color1Faint]
+Color=<%= palette.red1.to_a.join(',') %>
+
+[Color1Intense]
+Color=<%= palette.red0.to_a.join(',') %>
+
+[Color2]
+Color=<%= palette.lime1.to_a.join(',') %>
+
+[Color2Faint]
+Color=<%= palette.lime1.to_a.join(',') %>
+
+[Color2Intense]
+Color=<%= palette.lime0.to_a.join(',') %>
+
+[Color3]
+Color=<%= palette.yellow1.to_a.join(',') %>
+
+[Color3Faint]
+Color=<%= palette.yellow1.to_a.join(',') %>
+
+[Color3Intense]
+Color=<%= palette.yellow0.to_a.join(',') %>
+
+[Color4]
+Color=<%= palette.orange1.to_a.join(',') %>
+
+[Color4Faint]
+Color=<%= palette.orange1.to_a.join(',') %>
+
+[Color4Intense]
+Color=<%= palette.orange0.to_a.join(',') %>
+
+[Color5]
+Color=<%= palette.purple1.to_a.join(',') %>
+
+[Color5Faint]
+Color=<%= palette.purple1.to_a.join(',') %>
+
+[Color5Intense]
+Color=<%= palette.purple0.to_a.join(',') %>
+
+[Color6]
+Color=<%= palette.cyan1.to_a.join(',') %>
+
+[Color6Faint]
+Color=<%= palette.cyan1.to_a.join(',') %>
+
+[Color6Intense]
+Color=<%= palette.cyan0.to_a.join(',') %>
+
+[Color7]
+Color=<%= palette.gray4.to_a.join(',') %>
+
+[Color7Faint]
+Color=<%= palette.gray4.to_a.join(',') %>
+
+[Color7Intense]
+Color=<%= palette.fg.to_a.join(',') %>
+
+[Foreground]
+Color=<%= palette.fg.to_a.join(',') %>
+
+[ForegroundFaint]
+Color=<%= palette.fg.to_a.join(',') %>
+
+[ForegroundIntense]
+Color=<%= palette.fg.to_a.join(',') %>
+
+[General]
+Description=<%= description %>
+Opacity=1
+Wallpaper=

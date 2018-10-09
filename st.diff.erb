@@ -1,4 +1,6 @@
-diff --git a/config.def.h b/config.def.h
+<%
+    palette = Undefined.public_send(variant)
+%>diff --git a/config.def.h b/config.def.h
 index 823e79f..f90091c 100644
 --- a/config.def.h
 +++ b/config.def.h
@@ -14,14 +16,14 @@ index 823e79f..f90091c 100644
 -	"magenta3",
 -	"cyan3",
 -	"gray90",
-+	"<%= Undefined.light.bg %>",
-+	"<%= Undefined.light.red1 %>",
-+	"<%= Undefined.light.lime1 %>",
-+	"<%= Undefined.light.yellow1 %>",
-+	"<%= Undefined.light.orange1 %>",
-+	"<%= Undefined.light.purple1 %>",
-+	"<%= Undefined.light.cyan1 %>",
-+	"<%= Undefined.light.gray4 %>",
++	"<%= palette.bg %>",
++	"<%= palette.red1 %>",
++	"<%= palette.lime1 %>",
++	"<%= palette.yellow1 %>",
++	"<%= palette.orange1 %>",
++	"<%= palette.purple1 %>",
++	"<%= palette.cyan1 %>",
++	"<%= palette.gray4 %>",
  
  	/* 8 bright colors */
 -	"gray50",
@@ -32,14 +34,14 @@ index 823e79f..f90091c 100644
 -	"magenta",
 -	"cyan",
 -	"white",
-+	"<%= Undefined.light.gray2 %>",
-+	"<%= Undefined.light.red0 %>",
-+	"<%= Undefined.light.lime0 %>",
-+	"<%= Undefined.light.yellow0 %>",
-+	"<%= Undefined.light.orange0 %>",
-+	"<%= Undefined.light.purple0 %>",
-+	"<%= Undefined.light.cyan0 %>",
-+	"<%= Undefined.light.fg %>",
++	"<%= palette.gray2 %>",
++	"<%= palette.red0 %>",
++	"<%= palette.lime0 %>",
++	"<%= palette.yellow0 %>",
++	"<%= palette.orange0 %>",
++	"<%= palette.purple0 %>",
++	"<%= palette.cyan0 %>",
++	"<%= palette.fg %>",
  
  	[255] = 0,
 -
