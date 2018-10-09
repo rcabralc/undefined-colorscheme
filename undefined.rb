@@ -413,7 +413,7 @@ module Undefined
 
     def scheme
       @scheme ||= Scheme.new(
-        CIELUV.new(11, 5, 6),
+        CIELUV.new(12, 6, 8),
         CIELUV.new(77, 21, 31),
         red: CIELUV.new(47, 133, 26),
         lime: CIELUV.new(60, 5, 66),
