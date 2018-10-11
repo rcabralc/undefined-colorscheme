@@ -332,10 +332,12 @@ module Undefined
         dark.add(:altbg, @bg.blend(CIELUV.new(0, 0, 0), 0.27), background: true, alternate: true)
         @colors.each do |name, color|
           color1 = color.blend(@bg, 0.25)
-          color2 = color.blend(@bg, 0.75)
+          color2 = color.blend(@bg, 0.65)
+          color3 = color.blend(@bg, 0.75)
           dark.add(:"#{name}0", color, accent: true)
           dark.add(:"#{name}1", color1, accent: true)
           dark.add(:"#{name}2", color2, background: true)
+          dark.add(:"#{name}3", color3, background: true, alternate: true)
         end
         grayscale do |weight, meta, index|
           color = @bg.blend(@fg, weight)
@@ -352,10 +354,12 @@ module Undefined
         @colors.keys.each do |name|
           color = dark.get(:"#{name}0").color.reflect_l(@bg, @fg)
           color1 = color.blend(@fg, 0.25)
-          color2 = color.blend(@fg, 0.75)
+          color2 = color.blend(@fg, 0.65)
+          color3 = color.blend(@fg, 0.75)
           light.add(:"#{name}0", color, accent: true)
           light.add(:"#{name}1", color1, accent: true)
           light.add(:"#{name}2", color2, background: true)
+          light.add(:"#{name}3", color3, background: true, alternate: true)
         end
         grayscale do |weight, meta, index|
           color = @fg.blend(@bg, weight)
