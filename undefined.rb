@@ -258,13 +258,13 @@ module Undefined
     end
 
     def add(name, color, index = @palette&.size || 0, **meta)
-      tone = Tone.new(name, color, index, **meta)
-      (@palette ||= []) << tone
-      define_singleton_method(name) { tone }
+      swatch = Swatch.new(name, color, index, **meta)
+      (@palette ||= []) << swatch
+      define_singleton_method(name) { swatch }
     end
 
     def get(name)
-      detect { |tone| tone.name == name }
+      detect { |swatch| swatch.name == name }
     end
 
     def each(&block)
@@ -272,7 +272,7 @@ module Undefined
     end
   end
 
-  class Tone
+  class Swatch
     include Enumerable
 
     attr_reader :name, :color, :index
@@ -315,6 +315,37 @@ module Undefined
 
     def alternate?
       @alternate
+    end
+
+    def print(bg, fg)
+      f = format("% 4d,% 4d,% 4d", *srgb_ints)
+      c = Undefined::ContrastRatio.new((background? ? fg : bg).srgb, srgb)
+      swatch_colors = background? ? [srgb, fg.srgb] : [bg.srgb, srgb]
+      "#{f} #{c} #{usage} #{swatch(*swatch_colors)}"
+    end
+
+  private
+
+    def usage
+      [alternate? ? 'A' : ' ',
+       background? ? 'B' : ' ',
+       foreground? ? 'F' : ' '].join
+    end
+
+    def swatch(bg, fg)
+      "\x1b[#{bg_es}  \x1b[#{bg_es(bg)}\x1b[#{fg_es(fg)}#{self}\x1b[0m"
+    end
+
+    def srgb_ints
+      color.srgb.map(&:round)
+    end
+
+    def bg_es(color = self)
+      "48;2;#{color.to_a.join(';')}m"
+    end
+
+    def fg_es(color = self)
+      "38;2;#{color.to_a.join(';')}m"
     end
   end
 
@@ -431,19 +462,10 @@ module Undefined
 end
 
 if __FILE__ == $0
-  Undefined.dark.zip(Undefined.light).each do |dark_tone, light_tone|
-    black = Undefined.dark.bg.color
-    white = Undefined.dark.fg.color
-    row = [[dark_tone, black, white], [light_tone, white, black]]
-    puts(row.map do |tone, bgcolor, fgcolor|
-      br, bg, bb = bgcolor.srgb.cap.to_a
-      fr, fg, fb = fgcolor.srgb.cap.to_a
-      cr, cg, cb = tone.srgb.to_a
-      f = format("% 4d,% 4d,% 4d", *tone.color.srgb.map(&:round))
-      c = Undefined::ContrastRatio.new(bgcolor, tone.srgb)
-      "#{f} #{c}"\
-        "\x1b[38;2;#{cr};#{cg};#{cb}m\x1b[48;2;#{br};#{bg};#{bb}m#{tone}\x1b[0m"\
-        "\x1b[48;2;#{cr};#{cg};#{cb}m\x1b[38;2;#{fr};#{fg};#{fb}m#{tone}\x1b[0m"
-    end.join(' '))
+  Undefined.dark.zip(Undefined.light).each do |dark_swatch, light_swatch|
+    black = Undefined.dark.bg
+    white = Undefined.dark.fg
+    row = [[dark_swatch, black, white], [light_swatch, white, black]]
+    puts(row.map { |swatch, bg, fg| swatch.print(bg, fg) }.join(' '))
   end
 end
