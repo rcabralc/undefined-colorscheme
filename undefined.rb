@@ -258,7 +258,7 @@ module Undefined
     end
 
     def add(name, color, index = @palette&.size || 0, **meta)
-      swatch = Swatch.new(name, color, index, **meta)
+      swatch = Swatch.new(self, name, color, index, **meta)
       (@palette ||= []) << swatch
       define_singleton_method(name) { swatch }
     end
@@ -277,9 +277,10 @@ module Undefined
 
     attr_reader :name, :color, :index
 
-    def initialize(name, color, index,
-                  background: false, foreground: false,
-                  accent: false, alternate: false)
+    def initialize(palette, name, color, index,
+                   background: false, foreground: false,
+                   accent: false, alternate: false)
+      @palette = palette
       @name = name
       @color = color
       @index = index
@@ -317,11 +318,17 @@ module Undefined
       @alternate
     end
 
-    def print(bg, fg)
+    def description
       f = format("% 4d,% 4d,% 4d", *srgb_ints)
-      c = Undefined::ContrastRatio.new((background? ? fg : bg).srgb, srgb)
-      swatch_colors = background? ? [srgb, fg.srgb] : [bg.srgb, srgb]
-      "#{f} #{c} #{usage} #{swatch(*swatch_colors)}"
+      c = ContrastRatio.new((background? ? @palette.fg : @palette.bg).srgb, srgb)
+      "#{f} #{c} #{usage} #{print(size: 2)}"
+    end
+
+    def print(bg: background? ? srgb : @palette.bg.srgb,
+              fg: background? ? @palette.fg.srgb : srgb,
+              size: 0)
+      "\x1b[#{bg_es(bg)}\x1b[#{fg_es(fg)}#{self}\x1b[0m"\
+        "\x1b[#{bg_es}#{' ' * size}\x1b[0m"
     end
 
   private
@@ -330,10 +337,6 @@ module Undefined
       [alternate? ? 'A' : ' ',
        background? ? 'B' : ' ',
        foreground? ? 'F' : ' '].join
-    end
-
-    def swatch(bg, fg)
-      "\x1b[#{bg_es}  \x1b[#{bg_es(bg)}\x1b[#{fg_es(fg)}#{self}\x1b[0m"
     end
 
     def srgb_ints
@@ -462,10 +465,28 @@ module Undefined
 end
 
 if __FILE__ == $0
-  Undefined.dark.zip(Undefined.light).each do |dark_swatch, light_swatch|
-    black = Undefined.dark.bg
-    white = Undefined.dark.fg
-    row = [[dark_swatch, black, white], [light_swatch, white, black]]
-    puts(row.map { |swatch, bg, fg| swatch.print(bg, fg) }.join(' '))
+  if ARGV[0] == 'compare'
+    [[0, 0], [0, 1], [1, 1], [2, 2], [2, 3], [3, 3]].each do |t1, t2|
+      header = [Undefined.dark, Undefined.light].flat_map do |palette|
+        ["  #{t1}x#{t2}  ", *%i(red lime yellow purple orange cyan).map do |n|
+          palette.get(:"#{n}#{t1}").print
+        end]
+      end
+      puts(header.join)
+      %i(red lime yellow purple orange cyan).each do |b|
+        row = [Undefined.dark, Undefined.light].flat_map do |palette|
+          base = palette.get(:"#{b}#{t2}")
+          contrasts = %i(red lime yellow purple orange cyan).map do |n|
+            Undefined::ContrastRatio.new(base.srgb, palette.get(:"#{n}#{t1}").srgb)
+          end
+          [base.print, *contrasts.map { |c| " #{c}" }]
+        end
+        puts(row.join)
+      end
+    end
+  else
+    Undefined.dark.zip(Undefined.light).each do |dark_swatch, light_swatch|
+      puts("#{dark_swatch.description} #{light_swatch.description}")
+    end
   end
 end
