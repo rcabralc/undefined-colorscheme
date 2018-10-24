@@ -60,8 +60,10 @@ let g:colors_name = "undefined"
 let s:is_dark = (&bg ==# 'dark')
 if s:is_dark
   let s:palette.current = s:palette.dark
+  let s:palette.complementary = s:palette.light
 else
   let s:palette.current = s:palette.light
+  let s:palette.complementary = s:palette.dark
 endif
 
 <% Undefined.dark.map(&:name).each do |name| %>
@@ -69,6 +71,7 @@ endif
 <% end %>
 
 call s:hl('Normal', s:fg, s:bg)
+call s:hl('NormalNC', s:palette.complementary.gray1, s:gray0)
 
 "        *Comment        any comment
 if s:options.allow_italics
