@@ -83,17 +83,17 @@ endif
 "         Number         a number constant: 234, 0xff
 "         Boolean        a boolean constant: TRUE, false
 "         Float          a floating point constant: 2.3e10
-call s:hl('Constant', s:purple0, 'NONE')
+call s:hl('Constant', s:orange0, 'NONE')
 call s:hl('String', s:yellow0, 'NONE')
 call s:hl('Character', s:yellow0, 'NONE')
 call s:hl('Number', s:yellow0, 'NONE')
-call s:hl('Boolean', s:cyan0, 'NONE')
+call s:hl('Boolean', s:yellow0, 'NONE')
 call s:hl('Float', s:yellow0, 'NONE')
 
 "        *Identifier     any variable name
 "         Function       function name (also: methods for classes)
-call s:hl('Identifier', s:orange0, 'NONE')
-call s:hl('Function', s:red0, 'NONE')
+call s:hl('Identifier', s:yellow0, 'NONE', 'bold')
+call s:hl('Function', s:orange0, 'NONE', 'bold')
 
 "        *Statement      any statement
 "         Conditional    if, then, else, endif, switch, etc.
@@ -102,23 +102,22 @@ call s:hl('Function', s:red0, 'NONE')
 "         Operator       "sizeof", "+", "*", etc.
 "         Keyword        any other keyword
 "         Exception      try, catch, throw
-call s:hl('Statement', s:purple0, 'NONE', 'bold')
-call s:hl('Operator', s:red0, 'NONE', 'bold')
-call s:hl('Exception', s:red0, 'NONE', 'bold')
+call s:hl('Statement', s:purple0, 'NONE')
+call s:hl('Operator', s:cyan0, 'NONE', 'bold')
 
 "        *PreProc        generic Preprocessor
 "         Include        preprocessor #include
 "         Define         preprocessor #define
 "         Macro          same as Define
 "         PreCondit      preprocessor #if, #else, #endif, etc.
-call s:hl('PreProc', s:purple0, 'NONE', 'bold')
+call s:hl('PreProc', s:purple0, 'NONE')
 
 "        *Type           int, long, char, etc.
 "         StorageClass   static, register, volatile, etc.
 "         Structure      struct, union, enum, etc.
 "         Typedef        A typedef
-call s:hl('Type', s:lime0, 'NONE')
-call s:hl('StorageClass', s:red0, 'NONE', 'bold')
+call s:hl('Type', s:red0, 'NONE', 'bold')
+call s:hl('StorageClass', s:lime0, 'NONE')
 
 "        *Special        any special symbol
 "         SpecialChar    special character in a constant
@@ -126,8 +125,7 @@ call s:hl('StorageClass', s:red0, 'NONE', 'bold')
 "         Delimiter      character that needs attention
 "         SpecialComment special things inside a comment
 "         Debug          debugging statements
-call s:hl('Special', s:cyan0, 'NONE')
-call s:hl('Delimiter', s:red0, 'NONE', 'bold')
+call s:hl('Special', s:purple0, 'NONE', 'bold')
 call s:hl('SpecialComment', s:cyan0, 'NONE', 'bold')
 
 "        *Underlined     text that stands out, HTML links
@@ -192,11 +190,11 @@ call s:hl('TabLineFill', 'NONE', s:gray0)
 call s:hl('TabLineSel', s:fg, s:gray3, 'bold')
 call s:hl('CursorColumn', 'NONE', s:gray1)
 call s:hl('CursorLine', 'NONE', s:gray1)
-call s:hl('CursorLineNr', s:orange0, s:bg)
+call s:hl('CursorLineNr', s:lime0, s:bg)
 call s:hl('ColorColumn', 'NONE', s:gray0)
 call s:hl('Cursor', 'NONE', 'NONE', 'reverse')
 hi! link lCursor Cursor
-call s:hl('MatchParen', s:cyan0, 'NONE', 'bold,underline')
+call s:hl('MatchParen', s:red0, 'NONE', 'reverse,bold,underline')
 
 let g:terminal_color_0 = s:bg
 let g:terminal_color_1 = s:red1
