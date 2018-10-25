@@ -1,15 +1,44 @@
 <%
     palette = Undefined.public_send(variant)
 %>{
+    "manifest_version": 2,
+    "name": "Undefined <%= variant.upcase %> Firefox Theme",
+    "version": "0.1",
     "theme": {
         "colors": {
             "accentcolor": "<%= palette.bg %>",
+            "button_background_hover": "<%= palette.purple2 %>",
+            "button_background_active": "<%= palette.purple2 %>",
+            "icons_attention": "<%= palette.cyan0 %>",
+            "popup": "<%= palette.bg %>",
+            "popup_border": "<%= palette.bg %>",
+            "popup_highlight": "<%= palette.purple2 %>",
+            "popup_highlight_text": "<%= palette.fg %>",
+            "popup_text": "<%= palette.fg %>",
+            "sidebar": "<%= palette.bg %>",
+            "sidebar_border": "<%= palette.bg %>",
+            "sidebar_highlight": "<%= palette.purple2 %>",
+            "sidebar_highlight_text": "<%= palette.fg %>",
+            "sidebar_text": "<%= palette.fg %>",
+            "tab_background_separator": "<%= palette.gray4 %>",
+            "tab_line": "<%= palette.orange0 %>",
+            "tab_loading": "<%= palette.yellow0 %>",
+            "tab_selected": "<%= palette.orange3 %>",
+            "toolbar": "<%= palette.bg %>",
+            "toolbar_bottom_separator": "<%= palette.bg %>",
+            "toolbar_field": "<%= palette.altbg %>",
+            "toolbar_field_border": "<%= palette.gray4 %>",
+            "toolbar_field_border_focus": "<%= palette.orange0 %>",
+            "toolbar_field_separator": "<%= palette.gray4 %>",
+            "toolbar_field_text": "<%= palette.fg %>",
+            "toolbar_top_separator": "<%= palette.gray1 %>",
+            "toolbar_vertical_separator": "<%= palette.gray4 %>",
             "textcolor": "<%= palette.fg %>"
         }
     },
     "applications": {
         "gecko": {
-            "id": "undefined-<%= variant %>-theme",
+            "id": "undefined-<%= variant %>-theme@rcabralc",
             "strict_min_version": "63.0"
         }
     }
