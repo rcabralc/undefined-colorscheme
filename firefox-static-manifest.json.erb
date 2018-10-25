@@ -1,0 +1,16 @@
+<%
+    palette = Undefined.public_send(variant)
+%>{
+    "theme": {
+        "colors": {
+            "accentcolor": "<%= palette.bg %>",
+            "textcolor": "<%= palette.fg %>"
+        }
+    },
+    "applications": {
+        "gecko": {
+            "id": "undefined-<%= variant %>-theme",
+            "strict_min_version": "63.0"
+        }
+    }
+}
