@@ -28,6 +28,6 @@
     <notes_color value="<%= palette.purple0 %>"/>
     <notes_locked_color value="<%= palette.purple1 %>"/>
     <link_color value="<%= palette.cyan0 %>"/>
-    <restart_message_color value="<%= "ff#{palette.fg}" %>"/>
-    <shell_cmd_color value="<%= "ff#{palette.fg}" %>"/>
+    <restart_message_color value="<%= "#ff#{palette.fg.to_s.sub('#', '')}" %>"/>
+    <shell_cmd_color value="<%= "#ff#{palette.fg.to_s.sub('#', '')}" %>"/>
 </THEME>
