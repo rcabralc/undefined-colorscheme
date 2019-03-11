@@ -451,8 +451,8 @@ module Undefined
 
     def scheme
       @scheme ||= Scheme.new(
-        CIELUV.new(12, 6, 8),
-        CIELUV.new(88, 24, 37),
+        CIELUV.new(11, 6, 8),
+        CIELUV.new(89, 24, 37),
         red: CIELUV.new(50, 133, 26),
         lime: CIELUV.new(60, 5, 66),
         yellow: CIELUV.new(65, 50, 45),
