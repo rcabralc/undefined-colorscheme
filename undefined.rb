@@ -456,7 +456,7 @@ module Undefined
         red: CIELUV.new(50, 154, 23),
         lime: CIELUV.new(60, 5, 66),
         yellow: CIELUV.new(65, 50, 45),
-        purple: CIELUV.new(50, 84, -5),
+        purple: CIELUV.new(50, 97, -9),
         orange: CIELUV.new(50, 99, 41),
         cyan: CIELUV.new(60, -30, 1),
       )
