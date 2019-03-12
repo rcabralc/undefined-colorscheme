@@ -453,7 +453,7 @@ module Undefined
       @scheme ||= Scheme.new(
         CIELUV.new(11, 6, 8),
         CIELUV.new(89, 24, 37),
-        red: CIELUV.new(50, 133, 26),
+        red: CIELUV.new(50, 154, 23),
         lime: CIELUV.new(60, 5, 66),
         yellow: CIELUV.new(65, 50, 45),
         purple: CIELUV.new(50, 84, -5),
