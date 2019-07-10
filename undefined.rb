@@ -251,13 +251,14 @@ module Undefined
 
     def initialize
       raise ArgumentError, 'a block is required' unless block_given?
+      @swatches = []
       yield self
       freeze
     end
 
-    def add(name, color, index = @palette&.size || 0, **meta)
+    def add(name, color, index = @swatches.size, **meta)
       swatch = Swatch.new(self, name, color, index, **meta)
-      (@palette ||= []) << swatch
+      @swatches << swatch
       define_singleton_method(name) { swatch }
     end
 
@@ -266,7 +267,7 @@ module Undefined
     end
 
     def each(&block)
-      (@palette ||= []).each(&block)
+      @swatches.each(&block)
     end
   end
 
@@ -392,6 +393,33 @@ module Undefined
       end
     end
 
+    def print
+      if ARGV[0] == 'compare'
+        [[0, 0], [0, 1], [1, 1], [2, 2], [2, 3], [3, 3]].each do |t1, t2|
+          header = [dark, light].flat_map do |palette|
+            ["  #{t1}x#{t2}  ", *@colors.keys.map do |n|
+              palette.get(:"#{n}#{t1}").print
+            end]
+          end
+          puts(header.join)
+          @colors.keys.each do |b|
+            row = [dark, light].flat_map do |palette|
+              base = palette.get(:"#{b}#{t2}")
+              contrasts = @colors.keys.map do |n|
+                ContrastRatio.new(base.srgb, palette.get(:"#{n}#{t1}").srgb)
+              end
+              [base.print, *contrasts.map { |c| " #{c}" }]
+            end
+            puts(row.join)
+          end
+        end
+      else
+        dark.zip(light).each do |dark_swatch, light_swatch|
+          puts("#{dark_swatch.description} #{light_swatch.description}")
+        end
+      end
+    end
+
   private
 
     def grayscale(&block)
@@ -428,55 +456,24 @@ module Undefined
     end
   end
 
-  class << self
-    def dark
-      scheme.dark
-    end
+  Undefined = Scheme.new(
+    CIELUV.new(11, 6, 8),
+    CIELUV.new(89, 24, 37),
+    red: CIELUV.new(50, 154, 23),
+    lime: CIELUV.new(60, -6, 67),
+    yellow: CIELUV.new(65, 50, 45),
+    purple: CIELUV.new(50, 97, -9),
+    orange: CIELUV.new(50, 103, 43),
+    cyan: CIELUV.new(60, -48, 0),
+  )
 
-    def light
-      scheme.light
-    end
-
-  private
-
-    def scheme
-      @scheme ||= Scheme.new(
-        CIELUV.new(11, 6, 8),
-        CIELUV.new(89, 24, 37),
-        red: CIELUV.new(50, 154, 23),
-        lime: CIELUV.new(60, -6, 67),
-        yellow: CIELUV.new(65, 50, 45),
-        purple: CIELUV.new(50, 97, -9),
-        orange: CIELUV.new(50, 103, 43),
-        cyan: CIELUV.new(60, -48, 0),
-      )
-    end
+  def self.dark
+    Undefined.dark
   end
-end
 
-if __FILE__ == $0
-  if ARGV[0] == 'compare'
-    [[0, 0], [0, 1], [1, 1], [2, 2], [2, 3], [3, 3]].each do |t1, t2|
-      header = [Undefined.dark, Undefined.light].flat_map do |palette|
-        ["  #{t1}x#{t2}  ", *%i(red lime yellow purple orange cyan).map do |n|
-          palette.get(:"#{n}#{t1}").print
-        end]
-      end
-      puts(header.join)
-      %i(red lime yellow purple orange cyan).each do |b|
-        row = [Undefined.dark, Undefined.light].flat_map do |palette|
-          base = palette.get(:"#{b}#{t2}")
-          contrasts = %i(red lime yellow purple orange cyan).map do |n|
-            Undefined::ContrastRatio.new(base.srgb, palette.get(:"#{n}#{t1}").srgb)
-          end
-          [base.print, *contrasts.map { |c| " #{c}" }]
-        end
-        puts(row.join)
-      end
-    end
-  else
-    Undefined.dark.zip(Undefined.light).each do |dark_swatch, light_swatch|
-      puts("#{dark_swatch.description} #{light_swatch.description}")
-    end
+  def self.light
+    Undefined.light
   end
+
+  Undefined.print if __FILE__ == $0
 end
