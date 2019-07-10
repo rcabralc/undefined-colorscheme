@@ -422,7 +422,7 @@ module Undefined
 
     def initialize(color1, color2)
       @value = [color1.relative_luminance, color2.relative_luminance]
-        .sort.reverse.map { |y| y + 0.05 }.reduce(&:/)
+        .sort.reverse.map { |y| y + 0.05 }.reduce(&:'/')
     end
 
     def <=>(other)
