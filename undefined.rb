@@ -434,7 +434,7 @@ module Undefined
     end
 
     def to_s
-      format('%0.2f:1', @value)
+      format('%5.2f:1', @value)
     end
   end
 
