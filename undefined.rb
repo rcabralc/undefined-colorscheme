@@ -57,7 +57,6 @@ module Undefined
     end
 
     def blend(other, weight)
-      weight = [0.0, [1.0, weight].min].max
       selfweight = 1.0 - weight
       self.class.new(*zip(other).map { |(c1, c2)| c1 * selfweight + c2 * weight })
     end
@@ -180,7 +179,6 @@ module Undefined
     end
 
     def blend(other, weight)
-      weight = [0.0, [1.0, weight].min].max
       selfweight = 1.0 - weight
       self.class.new(*zip(other).map { |(c1, c2)| c1 * selfweight + c2 * weight })
     end
@@ -363,7 +361,7 @@ module Undefined
       @dark ||= Palette.new do |dark|
         dark.add(:bg, @bg, background: true)
         dark.add(:fg, @fg, foreground: true)
-        dark.add(:altbg, @bg.blend(CIELUV.new(0, 0, 0), 0.27), background: true, alternate: true)
+        dark.add(:altbg, @bg.blend(@fg, -0.06), background: true, alternate: true)
         @colors.each do |name, color|
           color1 = color.blend(@bg, 0.25)
           color2 = color.blend(@bg, 0.65)
@@ -381,23 +379,15 @@ module Undefined
     end
 
     def light
-      @light ||= Palette.new do |light|
-        light.add(:bg, @fg, background: true)
-        light.add(:fg, @bg, foreground: true)
-        light.add(:altbg, @fg.blend(CIELUV.new(100, 0, 0), 0.11), background: true, alternate: true)
-        @colors.keys.each do |name|
-          color = dark.get(:"#{name}0").color.reflect_l(@bg, @fg)
-          color1 = color.blend(@fg, 0.25)
-          color2 = color.blend(@fg, 0.65)
-          color3 = color.blend(@fg, 0.75)
-          light.add(:"#{name}0", color, accent: true)
-          light.add(:"#{name}1", color1, accent: true)
-          light.add(:"#{name}2", color2, background: true)
-          light.add(:"#{name}3", color3, background: true, alternate: true)
-        end
-        grayscale do |weight, meta, index|
-          color = @fg.blend(@bg, weight)
-          light.add(:"gray#{index}", color, meta)
+      @light ||= Palette.new do |palette|
+        black = CIELUV.new(0, 0, 0)
+        white = CIELUV.new(100, 0, 0)
+        @dark.each do |swatch|
+          palette.add(swatch.name, swatch.color.reflect_l(black, white),
+                      background: swatch.background?,
+                      foreground: swatch.foreground?,
+                      accent: swatch.accent?,
+                      alternate: swatch.alternate?)
         end
       end
     end
