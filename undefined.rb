@@ -256,14 +256,16 @@ module Undefined
       freeze
     end
 
-    def add(name, color, index = @swatches.size, **meta)
-      swatch = Swatch.new(self, name, color, index, **meta)
+    def add(color, name, *aliases, **meta)
+      index = @swatches.size
+      swatch = Swatch.new(self, index, color, name, *aliases, **meta)
       @swatches << swatch
       define_singleton_method(name) { swatch }
+      aliases.each { |a| define_singleton_method(a) { swatch } }
     end
 
     def get(name)
-      detect { |swatch| swatch.name == name }
+      detect { |swatch| swatch.known_by?(name) }
     end
 
     def each(&block)
@@ -274,19 +276,24 @@ module Undefined
   class Swatch
     include Enumerable
 
-    attr_reader :name, :color, :index
+    attr_reader :color, :name, :aliases, :index
 
-    def initialize(palette, name, color, index,
+    def initialize(palette, index, color, name, *aliases,
                    background: false, foreground: false,
                    accent: false, alternate: false)
       @palette = palette
       @name = name
+      @aliases = aliases
       @color = color
       @index = index
       @background = background
       @foreground = foreground
       @accent = accent
       @alternate = alternate
+    end
+
+    def known_by?(name)
+      @name == name || @aliases.include?(name)
     end
 
     def srgb
@@ -360,21 +367,29 @@ module Undefined
 
     def dark
       @dark ||= Palette.new do |dark|
-        dark.add(:bg, @bg, background: true)
-        dark.add(:fg, @fg, foreground: true)
-        dark.add(:altbg, @bg.blend(@fg, -0.06), background: true, alternate: true)
-        @colors.each do |name, color|
+        dark.add(@bg, :bg, :term0, background: true)
+        dark.add(@fg, :fg, :term15, foreground: true)
+        dark.add(@bg.blend(@fg, -0.06), :altbg, :term16, background: true, alternate: true)
+        @colors.each.with_index do |(name, color), index|
           color1 = color.blend(@bg, 0.25)
           color2 = color.blend(@bg, 0.65)
           color3 = color.blend(@bg, 0.75)
-          dark.add(:"#{name}0", color, accent: true)
-          dark.add(:"#{name}1", color1, accent: true)
-          dark.add(:"#{name}2", color2, background: true)
-          dark.add(:"#{name}3", color3, background: true, alternate: true)
+          if index < 7
+            dark.add(color, :"#{name}0", :"term#{index + 9}", accent: true)
+            dark.add(color1, :"#{name}1", :"term#{index + 1}", accent: true)
+            dark.add(color2, :"#{name}2", :"term#{index + 9}_2", background: true)
+            dark.add(color3, :"#{name}3", :"term#{index + 9}_3", background: true, alternate: true)
+          else
+            dark.add(color, :"#{name}0", :"term#{index + 13}", accent: true)
+            dark.add(color1, :"#{name}1", :"term#{index + 13}_1", accent: true)
+            dark.add(color2, :"#{name}2", :"term#{index + 13}_2", background: true)
+            dark.add(color3, :"#{name}3", :"term#{index + 13}_3", background: true, alternate: true)
+          end
         end
         grayscale do |weight, meta, index|
           color = @bg.blend(@fg, weight)
-          dark.add(:"gray#{index}", color, meta)
+          alias_ = meta.delete(:alias)
+          dark.add(color, :"gray#{index}", alias_, **meta)
         end
       end
     end
@@ -384,7 +399,9 @@ module Undefined
         black = CIELUV.new(0, 0, 0)
         white = CIELUV.new(100, 0, 0)
         @dark.each do |swatch|
-          palette.add(swatch.name, swatch.color.reflect_l(black, white),
+          palette.add(swatch.color.reflect_l(black, white),
+                      swatch.name,
+                      *swatch.aliases,
                       background: swatch.background?,
                       foreground: swatch.foreground?,
                       accent: swatch.accent?,
@@ -415,7 +432,7 @@ module Undefined
         end
       else
         dark.zip(light).each do |dark_swatch, light_swatch|
-          puts("#{dark_swatch.description} #{light_swatch.description}")
+          puts("#{dark_swatch.description} #{light_swatch.description} #{dark_swatch.aliases.join(' ')}")
         end
       end
     end
@@ -424,11 +441,11 @@ module Undefined
 
     def grayscale(&block)
       [
-        [0.05, { alternate: true, background: true }],
-        [0.1, {}],
-        [0.25, {}],
-        [0.38, {}],
-        [0.5, { accent: true }]
+        [0.05, { alias: :term17, alternate: true, background: true }],
+        [0.1, { alias: :term18 }],
+        [0.25, { alias: :term8 }],
+        [0.38, { alias: :term19 }],
+        [0.5, { alias: :term7, accent: true }]
       ].each_with_index do |(weight, meta), index|
         yield weight, meta, index
       end
