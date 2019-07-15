@@ -31,11 +31,11 @@ endfunction
 " ------------------
 
 let s:palette = { 'dark': {}, 'light': {} }
-<% Undefined.dark.each do |tone| %>
-  let s:palette.dark.<%= tone.name %> = "<%= tone %>"
+<% Undefined.dark.each do |swatch| %>
+  let s:palette.dark.<%= swatch.aliases.first %> = "<%= swatch %>"
 <% end %>
-<% Undefined.light.each do |tone| %>
-  let s:palette.light.<%= tone.name %> = "<%= tone %>"
+<% Undefined.light.each do |swatch| %>
+  let s:palette.light.<%= swatch.aliases.first %> = "<%= swatch %>"
 <% end %>
 
 let g:undefined#palette = s:palette
@@ -66,18 +66,18 @@ else
   let s:palette.complementary = s:palette.dark
 endif
 
-<% Undefined.dark.map(&:name).each do |name| %>
-  let s:<%= name %> = s:palette.current.<%= name %>
+<% Undefined.dark.each do |swatch| %>
+  let s:<%= swatch.aliases.first %> = s:palette.current.<%= swatch.aliases.first %>
 <% end %>
 
-call s:hl('Normal', s:fg, s:bg)
-call s:hl('NormalNC', s:palette.complementary.gray1, s:gray0)
+call s:hl('Normal', s:term15, s:term0)
+call s:hl('NormalNC', s:palette.complementary.term18, s:term17)
 
 "        *Comment        any comment
 if s:options.allow_italics
-    call s:hl('Comment', s:gray4, 'NONE', 'italic')
+    call s:hl('Comment', s:term7, 'NONE', 'italic')
 else
-    call s:hl('Comment', s:gray4, 'NONE')
+    call s:hl('Comment', s:term7, 'NONE')
 endif
 
 "        *Constant       any constant
@@ -86,17 +86,17 @@ endif
 "         Number         a number constant: 234, 0xff
 "         Boolean        a boolean constant: TRUE, false
 "         Float          a floating point constant: 2.3e10
-call s:hl('Constant', s:orange0, 'NONE')
-call s:hl('String', s:yellow0, 'NONE')
-call s:hl('Character', s:yellow0, 'NONE')
-call s:hl('Number', s:yellow0, 'NONE')
-call s:hl('Boolean', s:yellow0, 'NONE')
-call s:hl('Float', s:yellow0, 'NONE')
+call s:hl('Constant', s:term13, 'NONE')
+call s:hl('String', s:term11, 'NONE')
+call s:hl('Character', s:term11, 'NONE')
+call s:hl('Number', s:term11, 'NONE')
+call s:hl('Boolean', s:term11, 'NONE')
+call s:hl('Float', s:term11, 'NONE')
 
 "        *Identifier     any variable name
 "         Function       function name (also: methods for classes)
-call s:hl('Identifier', s:yellow0, 'NONE', 'bold')
-call s:hl('Function', s:orange0, 'NONE', 'bold')
+call s:hl('Identifier', s:term11, 'NONE', 'bold')
+call s:hl('Function', s:term13, 'NONE', 'bold')
 
 "        *Statement      any statement
 "         Conditional    if, then, else, endif, switch, etc.
@@ -105,22 +105,22 @@ call s:hl('Function', s:orange0, 'NONE', 'bold')
 "         Operator       "sizeof", "+", "*", etc.
 "         Keyword        any other keyword
 "         Exception      try, catch, throw
-call s:hl('Statement', s:purple0, 'NONE')
-call s:hl('Operator', s:cyan0, 'NONE', 'bold')
+call s:hl('Statement', s:term12, 'NONE')
+call s:hl('Operator', s:term14, 'NONE', 'bold')
 
 "        *PreProc        generic Preprocessor
 "         Include        preprocessor #include
 "         Define         preprocessor #define
 "         Macro          same as Define
 "         PreCondit      preprocessor #if, #else, #endif, etc.
-call s:hl('PreProc', s:purple0, 'NONE')
+call s:hl('PreProc', s:term12, 'NONE')
 
 "        *Type           int, long, char, etc.
 "         StorageClass   static, register, volatile, etc.
 "         Structure      struct, union, enum, etc.
 "         Typedef        A typedef
-call s:hl('Type', s:red0, 'NONE', 'bold')
-call s:hl('StorageClass', s:lime0, 'NONE')
+call s:hl('Type', s:term9, 'NONE', 'bold')
+call s:hl('StorageClass', s:term10, 'NONE')
 
 "        *Special        any special symbol
 "         SpecialChar    special character in a constant
@@ -128,98 +128,98 @@ call s:hl('StorageClass', s:lime0, 'NONE')
 "         Delimiter      character that needs attention
 "         SpecialComment special things inside a comment
 "         Debug          debugging statements
-call s:hl('Special', s:purple0, 'NONE', 'bold')
-call s:hl('SpecialComment', s:cyan0, 'NONE', 'bold')
+call s:hl('Special', s:term12, 'NONE', 'bold')
+call s:hl('SpecialComment', s:term14, 'NONE', 'bold')
 
 "        *Underlined     text that stands out, HTML links
-call s:hl('Underlined', s:cyan0, 'NONE', 'underline')
+call s:hl('Underlined', s:term14, 'NONE', 'underline')
 
 "        *Ignore         left blank, hidden  |hl-Ignore|
 call s:hl('Ignore', 'NONE', 'NONE')
 
 "        *Error          any erroneous construct
-call s:hl('Error', s:red0, 'NONE', 'bold,reverse')
+call s:hl('Error', s:term9, 'NONE', 'bold,reverse')
 
 "        *Todo           anything that needs extra attention; mostly the
 "                        keywords TODO FIXME and XXX
-call s:hl('Todo', s:orange0, 'NONE', 'bold')
+call s:hl('Todo', s:term13, 'NONE', 'bold')
 
 
 " Extended highlighting
-call s:hl('SpecialKey', s:purple0, 'NONE')
-call s:hl('NonText', s:gray2, 'NONE')
-call s:hl('StatusLine', s:fg, s:gray0, 'bold')
-call s:hl('StatusLineNC', s:gray3, s:gray0)
-call s:hl('Visual', 'NONE', s:purple2)
-call s:hl('Directory', s:orange0, 'NONE')
-call s:hl('ErrorMsg', s:red0, s:bg, 'bold')
-call s:hl('IncSearch', s:fg, s:cyan2)
-call s:hl('Search', s:fg, s:cyan2)
-call s:hl('QuickFixLine', 'NONE', s:yellow2)
-call s:hl('MoreMsg', s:lime0, s:bg)
-call s:hl('ModeMsg', s:orange0, s:bg)
-call s:hl('LineNr', s:gray3, s:gray0)
-call s:hl('Question', s:lime0, 'NONE', 'bold')
-call s:hl('VertSplit', s:gray2, s:gray0)
-call s:hl('Title', s:red0, 'NONE', 'bold')
-call s:hl('VisualNOS', s:bg, s:fg)
-call s:hl('WarningMsg', s:orange0, s:bg)
-call s:hl('WildMenu', s:lime0, s:bg)
-call s:hl('Folded', s:gray3, s:bg)
-call s:hl('FoldColumn', s:gray3, s:gray0)
-call s:hl('DiffAdd', 'NONE', s:lime3)
-call s:hl('DiffChange', 'NONE', s:yellow3)
-call s:hl('DiffDelete', 'NONE', s:red3)
-call s:hl('DiffText', 'NONE', s:cyan3, 'underline')
-call s:hl('SignColumn', s:orange0, s:gray0)
-call s:hl('Conceal', s:gray1, 'NONE')
+call s:hl('SpecialKey', s:term12, 'NONE')
+call s:hl('NonText', s:term8, 'NONE')
+call s:hl('StatusLine', s:term15, s:term17, 'bold')
+call s:hl('StatusLineNC', s:term19, s:term17)
+call s:hl('Visual', 'NONE', s:term12_2)
+call s:hl('Directory', s:term13, 'NONE')
+call s:hl('ErrorMsg', s:term9, s:term0, 'bold')
+call s:hl('IncSearch', s:term15, s:term14_2)
+call s:hl('Search', s:term15, s:term14_2)
+call s:hl('QuickFixLine', 'NONE', s:term11_2)
+call s:hl('MoreMsg', s:term10, s:term0)
+call s:hl('ModeMsg', s:term13, s:term0)
+call s:hl('LineNr', s:term19, s:term17)
+call s:hl('Question', s:term10, 'NONE', 'bold')
+call s:hl('VertSplit', s:term8, s:term17)
+call s:hl('Title', s:term9, 'NONE', 'bold')
+call s:hl('VisualNOS', s:term0, s:term15)
+call s:hl('WarningMsg', s:term13, s:term0)
+call s:hl('WildMenu', s:term10, s:term0)
+call s:hl('Folded', s:term19, s:term0)
+call s:hl('FoldColumn', s:term19, s:term17)
+call s:hl('DiffAdd', 'NONE', s:term10_3)
+call s:hl('DiffChange', 'NONE', s:term11_3)
+call s:hl('DiffDelete', 'NONE', s:term9_3)
+call s:hl('DiffText', 'NONE', s:term14_3, 'underline')
+call s:hl('SignColumn', s:term13, s:term17)
+call s:hl('Conceal', s:term18, 'NONE')
 if has('gui_running')
-    call s:hl('SpellBad', 'NONE', s:gray3, 'undercurl', 'NONE', s:red0)
-    call s:hl('SpellCap', 'NONE', s:gray3, 'undercurl', 'NONE', s:yellow0)
-    call s:hl('SpellRare', 'NONE', s:gray3, 'undercurl', 'NONE', s:fg)
-    call s:hl('SpellLocal', 'NONE', s:gray3, 'undercurl', 'NONE', s:purple0)
+    call s:hl('SpellBad', 'NONE', s:term19, 'undercurl', 'NONE', s:term9)
+    call s:hl('SpellCap', 'NONE', s:term19, 'undercurl', 'NONE', s:term11)
+    call s:hl('SpellRare', 'NONE', s:term19, 'undercurl', 'NONE', s:term15)
+    call s:hl('SpellLocal', 'NONE', s:term19, 'undercurl', 'NONE', s:term12)
 else
-    call s:hl('SpellBad', 'NONE', s:red2, 'underline', 'NONE', s:red0)
-    call s:hl('SpellCap', 'NONE', s:yellow2, 'underline', 'NONE', s:yellow0)
-    call s:hl('SpellRare', 'NONE', 'NONE', 'underline', 'NONE', s:fg)
-    call s:hl('SpellLocal', 'NONE', s:purple2, 'underline', 'NONE', s:purple0)
+    call s:hl('SpellBad', 'NONE', s:term9_2, 'underline', 'NONE', s:term9)
+    call s:hl('SpellCap', 'NONE', s:term11_2, 'underline', 'NONE', s:term11)
+    call s:hl('SpellRare', 'NONE', 'NONE', 'underline', 'NONE', s:term15)
+    call s:hl('SpellLocal', 'NONE', s:term12_2, 'underline', 'NONE', s:term12)
 endif
-call s:hl('Pmenu', s:fg, s:gray2)
-call s:hl('PmenuSel', s:bg, s:purple0, 'bold')
-call s:hl('PmenuSbar', 'NONE', s:gray2)
-call s:hl('PmenuThumb', 'NONE', s:gray3)
-call s:hl('TabLine', s:gray2, s:bg)
-call s:hl('TabLineFill', 'NONE', s:bg)
-call s:hl('TabLineSel', s:fg, s:orange3)
-call s:hl('CursorColumn', 'NONE', s:gray1)
-call s:hl('CursorLine', 'NONE', s:gray1)
-call s:hl('CursorLineNr', s:lime0, s:gray0)
-call s:hl('ColorColumn', 'NONE', s:gray0)
+call s:hl('Pmenu', s:term15, s:term8)
+call s:hl('PmenuSel', s:term0, s:term12, 'bold')
+call s:hl('PmenuSbar', 'NONE', s:term8)
+call s:hl('PmenuThumb', 'NONE', s:term19)
+call s:hl('TabLine', s:term8, s:term0)
+call s:hl('TabLineFill', 'NONE', s:term0)
+call s:hl('TabLineSel', s:term15, s:term13_3)
+call s:hl('CursorColumn', 'NONE', s:term18)
+call s:hl('CursorLine', 'NONE', s:term18)
+call s:hl('CursorLineNr', s:term10, s:term17)
+call s:hl('ColorColumn', 'NONE', s:term17)
 call s:hl('Cursor', 'NONE', 'NONE', 'reverse')
 hi! link lCursor Cursor
-call s:hl('MatchParen', s:red0, 'NONE', 'bold,underline')
+call s:hl('MatchParen', s:term9, 'NONE', 'bold,underline')
 
-let g:terminal_color_0 = s:bg
-let g:terminal_color_1 = s:red1
-let g:terminal_color_2 = s:lime1
-let g:terminal_color_3 = s:yellow1
-let g:terminal_color_4 = s:purple1
-let g:terminal_color_5 = s:orange1
-let g:terminal_color_6 = s:cyan1
-let g:terminal_color_7 = s:gray4
-let g:terminal_color_8 = s:gray2
-let g:terminal_color_9 = s:red0
-let g:terminal_color_10 = s:lime0
-let g:terminal_color_11 = s:yellow0
-let g:terminal_color_12 = s:purple0
-let g:terminal_color_13 = s:orange0
-let g:terminal_color_14 = s:cyan0
-let g:terminal_color_15 = s:fg
+let g:terminal_color_0 = s:term0
+let g:terminal_color_1 = s:term1
+let g:terminal_color_2 = s:term2
+let g:terminal_color_3 = s:term3
+let g:terminal_color_4 = s:term4
+let g:terminal_color_5 = s:term5
+let g:terminal_color_6 = s:term6
+let g:terminal_color_7 = s:term7
+let g:terminal_color_8 = s:term8
+let g:terminal_color_9 = s:term9
+let g:terminal_color_10 = s:term10
+let g:terminal_color_11 = s:term11
+let g:terminal_color_12 = s:term12
+let g:terminal_color_13 = s:term13
+let g:terminal_color_14 = s:term14
+let g:terminal_color_15 = s:term15
 
 " diff filetype
-call s:hl('diffAdded', s:lime0, 'NONE')
-call s:hl('diffChanged', s:yellow0, 'NONE')
-call s:hl('diffRemoved', s:red0, 'NONE')
+call s:hl('diffAdded', s:term10, 'NONE')
+call s:hl('diffChanged', s:term11, 'NONE')
+call s:hl('diffRemoved', s:term9, 'NONE')
 
 " Restore background saved.  Must be at the end due to a bug in VIM trying to
 " figuring out automagically if the background set through Normal highlight
