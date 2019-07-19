@@ -1,5 +1,7 @@
 <%
-    palette = Undefined.public_send(variant)
+    require_relative "./#{name.downcase}"
+    scheme = Undefined.const_get(name)
+    palette = scheme.public_send(variant)
 %>background=<%= palette.bg %>
 foreground=<%= palette.fg %>
 cursor=<%= palette.term6 %>

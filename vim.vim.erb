@@ -1,4 +1,8 @@
-" Name:   Undefined Colorscheme for Vim.
+<%
+  global = name.downcase
+  require_relative "./#{global}"
+  scheme = Undefined.const_get(name)
+%>" Name:   <%= name %> Colorscheme for Vim.
 " Author: rcabralc <rcabralc@gmail.com>
 
 let s:options = {
@@ -6,7 +10,7 @@ let s:options = {
 \ }
 
 function! s:merge_options()
-    for [k, v] in items(exists('g:undefined') ? g:undefined : {})
+    for [k, v] in items(exists('g:<%= global %>') ? g:<%= global %> : {})
         let s:options[k] = v
     endfor
 endfunction
@@ -31,14 +35,14 @@ endfunction
 " ------------------
 
 let s:palette = { 'dark': {}, 'light': {} }
-<% Undefined.dark.each do |swatch| %>
+<% scheme.dark.each do |swatch| %>
   let s:palette.dark.<%= swatch.aliases.first %> = "<%= swatch %>"
 <% end %>
-<% Undefined.light.each do |swatch| %>
+<% scheme.light.each do |swatch| %>
   let s:palette.light.<%= swatch.aliases.first %> = "<%= swatch %>"
 <% end %>
 
-let g:undefined#palette = s:palette
+let g:<%= global %>#palette = s:palette
 
 " Highlight definitions
 " For relevant help:
@@ -54,7 +58,7 @@ if exists("syntax on")
     syntax reset
 endif
 
-let g:colors_name = "undefined"
+let g:colors_name = "<%= global %>"
 " Save background value: workaround for Vim bug, restored (enforced) at the
 " end.
 let s:is_dark = (&bg ==# 'dark')
@@ -66,7 +70,7 @@ else
   let s:palette.complementary = s:palette.dark
 endif
 
-<% Undefined.dark.each do |swatch| %>
+<% scheme.dark.each do |swatch| %>
   let s:<%= swatch.aliases.first %> = s:palette.current.<%= swatch.aliases.first %>
 <% end %>
 

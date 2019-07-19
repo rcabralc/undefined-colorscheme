@@ -1,6 +1,8 @@
 <%
-    palette = Undefined.public_send(variant)
-    description = variant == 'dark' ? 'UndefinedDark' : 'UndefinedLight'
+    require_relative "./#{name.downcase}"
+    scheme = Undefined.const_get(name)
+    palette = scheme.public_send(variant)
+    description = variant == 'dark' ? "#{name}Dark" : "#{name}Light"
 %>[ColorEffects:Disabled]
 Color=<%= palette.bg.to_a.join(',') %>
 ColorAmount=0.65

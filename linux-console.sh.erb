@@ -1,5 +1,7 @@
 <%
-    palette = Undefined.public_send(variant)
+    require_relative "./#{name.downcase}"
+    scheme = Undefined.const_get(name)
+    palette = scheme.public_send(variant)
 %>#!/bin/sh
 echo -en "\e]P0<%= palette.bg.to_s.sub('#', '') %>"
 echo -en "\e]P1<%= palette.term1.to_s.sub('#', '') %>"

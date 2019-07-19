@@ -1,8 +1,10 @@
 <%
-    palette = Undefined.public_send(variant)
+    require_relative "./#{name.downcase}"
+    scheme = Undefined.const_get(name)
+    palette = scheme.public_send(variant)
 %>{
     "manifest_version": 2,
-    "name": "Undefined <%= variant.upcase %> Firefox Theme",
+    "name": "<%= name %> <%= variant.upcase %> Firefox Theme",
     "version": "0.1",
     "theme": {
         "colors": {

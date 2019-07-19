@@ -1,5 +1,7 @@
 <%
-    palette = Undefined.public_send(variant)
+    require_relative "./#{name.downcase}"
+    scheme = Undefined.const_get(name)
+    palette = scheme.public_send(variant)
 %>diff --git a/config.def.h b/config.def.h
 index 823e79f..f90091c 100644
 --- a/config.def.h

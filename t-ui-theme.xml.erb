@@ -1,5 +1,7 @@
 <%
-    palette = Undefined.public_send(variant)
+    require_relative "./#{name.downcase}"
+    scheme = Undefined.const_get(name)
+    palette = scheme.public_send(variant)
 %><?xml version="1.0" encoding="UTF-8"?>
 <THEME>
     <alias_content_color value="<%= palette.term14 %>"/>
