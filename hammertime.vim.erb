@@ -1,0 +1,232 @@
+<%
+  global = name.downcase
+  require_relative "./#{global}"
+  scheme = Undefined.const_get(name)
+%>" Name:   <%= name %> Colorscheme for Vim.
+" Author: rcabralc <rcabralc@gmail.com>
+
+let s:options = {
+    \ 'allow_italics': 0,
+\ }
+
+function! s:merge_options()
+    for [k, v] in items(exists('g:<%= global %>') ? g:<%= global %> : {})
+        let s:options[k] = v
+    endfor
+endfunction
+call s:merge_options()
+delfunction s:merge_options
+
+function! s:hl(group, fg, bg, ...)
+    let gui_sp = ''
+    if a:0 > 0
+        let gui_mod = a:1
+        if a:0 > 2
+            let gui_sp = ' guisp=' . a:3
+        endif
+    else
+        let gui_mod = 'NONE'
+    endif
+    exe "hi! ".a:group." guifg=".a:fg." guibg=".a:bg." gui=".gui_mod."".gui_sp
+endfunction
+
+
+" Palette definition
+" ------------------
+
+let s:palette = { 'dark': {}, 'light': {} }
+<% scheme.dark.each do |swatch| %>
+  let s:palette.dark.<%= swatch.aliases.first %> = "<%= swatch %>"
+<% end %>
+<% scheme.light.each do |swatch| %>
+  let s:palette.light.<%= swatch.aliases.first %> = "<%= swatch %>"
+<% end %>
+
+let g:<%= global %>#palette = s:palette
+
+" Highlight definitions
+" For relevant help:
+" :help highlight-groups
+" :help cterm-colors
+" :help group-name
+
+" For testing:
+" :source $VIMRUNTIME/syntax/hitest.vim
+
+hi clear
+if exists("syntax on")
+    syntax reset
+endif
+
+let g:colors_name = "<%= global %>"
+" Save background value: workaround for Vim bug, restored (enforced) at the
+" end.
+let s:is_dark = (&bg ==# 'dark')
+if s:is_dark
+  let s:palette.current = s:palette.dark
+  let s:palette.complementary = s:palette.light
+else
+  let s:palette.current = s:palette.light
+  let s:palette.complementary = s:palette.dark
+endif
+
+<% scheme.dark.each do |swatch| %>
+  let s:<%= swatch.aliases.first %> = s:palette.current.<%= swatch.aliases.first %>
+<% end %>
+
+call s:hl('Normal', s:term15, s:term0)
+call s:hl('NormalNC', s:palette.complementary.term18, s:term18)
+
+"        *Comment        any comment
+if s:options.allow_italics
+    call s:hl('Comment', s:term7, 'NONE', 'italic')
+else
+    call s:hl('Comment', s:term7, 'NONE')
+endif
+
+"        *Constant       any constant
+"         String         a string constant: "this is a string"
+"         Character      a character constant: 'c', '\n'
+"         Number         a number constant: 234, 0xff
+"         Boolean        a boolean constant: TRUE, false
+"         Float          a floating point constant: 2.3e10
+call s:hl('Constant', s:term10, 'NONE')
+call s:hl('String', s:term11, 'NONE')
+call s:hl('Character', s:term14, 'NONE')
+call s:hl('Number', s:term14, 'NONE')
+call s:hl('Boolean', s:term14, 'NONE')
+call s:hl('Float', s:term14, 'NONE')
+
+"        *Identifier     any variable name
+"         Function       function name (also: methods for classes)
+call s:hl('Identifier', s:term12, 'NONE', 'bold')
+call s:hl('Function', s:term14, 'NONE', 'bold')
+
+"        *Statement      any statement
+"         Conditional    if, then, else, endif, switch, etc.
+"         Repeat         for, do, while, etc.
+"         Label          case, default, etc.
+"         Operator       "sizeof", "+", "*", etc.
+"         Keyword        any other keyword
+"         Exception      try, catch, throw
+call s:hl('Statement', s:term9, 'NONE')
+
+"        *PreProc        generic Preprocessor
+"         Include        preprocessor #include
+"         Define         preprocessor #define
+"         Macro          same as Define
+"         PreCondit      preprocessor #if, #else, #endif, etc.
+call s:hl('PreProc', s:term9, 'NONE')
+
+"        *Type           int, long, char, etc.
+"         StorageClass   static, register, volatile, etc.
+"         Structure      struct, union, enum, etc.
+"         Typedef        A typedef
+call s:hl('Type', s:term13, 'NONE', 'bold')
+call s:hl('StorageClass', s:term10, 'NONE')
+
+"        *Special        any special symbol
+"         SpecialChar    special character in a constant
+"         Tag            you can use CTRL-] on this
+"         Delimiter      character that needs attention
+"         SpecialComment special things inside a comment
+"         Debug          debugging statements
+call s:hl('Special', s:term13, 'NONE', 'bold')
+call s:hl('SpecialComment', s:term14, 'NONE', 'bold')
+
+"        *Underlined     text that stands out, HTML links
+call s:hl('Underlined', s:term14, 'NONE', 'underline')
+
+"        *Ignore         left blank, hidden  |hl-Ignore|
+call s:hl('Ignore', 'NONE', 'NONE')
+
+"        *Error          any erroneous construct
+call s:hl('Error', s:term9, 'NONE', 'bold,reverse')
+
+"        *Todo           anything that needs extra attention; mostly the
+"                        keywords TODO FIXME and XXX
+call s:hl('Todo', s:term13, 'NONE', 'bold')
+
+
+" Extended highlighting
+call s:hl('SpecialKey', s:term12, 'NONE')
+call s:hl('NonText', s:term8, 'NONE')
+call s:hl('StatusLine', s:term15, s:term18, 'bold')
+call s:hl('StatusLineNC', s:term19, s:term18)
+call s:hl('Visual', 'NONE', s:term12_2)
+call s:hl('Directory', s:term13, 'NONE')
+call s:hl('ErrorMsg', s:term9, s:term0, 'bold')
+call s:hl('IncSearch', s:term15, s:term14_2)
+call s:hl('Search', s:term15, s:term14_2)
+call s:hl('QuickFixLine', 'NONE', s:term11_2)
+call s:hl('MoreMsg', s:term10, s:term0)
+call s:hl('ModeMsg', s:term13, s:term0)
+call s:hl('LineNr', s:term19, s:term18)
+call s:hl('Question', s:term10, 'NONE', 'bold')
+call s:hl('VertSplit', s:term8, s:term18)
+call s:hl('Title', s:term9, 'NONE', 'bold')
+call s:hl('VisualNOS', s:term0, s:term15)
+call s:hl('WarningMsg', s:term13, s:term0)
+call s:hl('WildMenu', s:term10, s:term0)
+call s:hl('Folded', s:term19, s:term0)
+call s:hl('FoldColumn', s:term19, s:term18)
+call s:hl('DiffAdd', 'NONE', s:term10_3)
+call s:hl('DiffChange', 'NONE', s:term11_3)
+call s:hl('DiffDelete', 'NONE', s:term9_3)
+call s:hl('DiffText', 'NONE', s:term14_3, 'underline')
+call s:hl('SignColumn', s:term13, s:term18)
+call s:hl('Conceal', s:term18, 'NONE')
+if has('gui_running')
+    call s:hl('SpellBad', 'NONE', s:term19, 'undercurl', 'NONE', s:term9)
+    call s:hl('SpellCap', 'NONE', s:term19, 'undercurl', 'NONE', s:term11)
+    call s:hl('SpellRare', 'NONE', s:term19, 'undercurl', 'NONE', s:term15)
+    call s:hl('SpellLocal', 'NONE', s:term19, 'undercurl', 'NONE', s:term12)
+else
+    call s:hl('SpellBad', 'NONE', s:term9_2, 'underline', 'NONE', s:term9)
+    call s:hl('SpellCap', 'NONE', s:term11_2, 'underline', 'NONE', s:term11)
+    call s:hl('SpellRare', 'NONE', 'NONE', 'underline', 'NONE', s:term15)
+    call s:hl('SpellLocal', 'NONE', s:term12_2, 'underline', 'NONE', s:term12)
+endif
+call s:hl('Pmenu', s:term15, s:term8)
+call s:hl('PmenuSel', s:term0, s:term12, 'bold')
+call s:hl('PmenuSbar', 'NONE', s:term8)
+call s:hl('PmenuThumb', 'NONE', s:term19)
+call s:hl('TabLine', s:term8, s:term0)
+call s:hl('TabLineFill', 'NONE', s:term0)
+call s:hl('TabLineSel', s:term15, s:term13_3)
+call s:hl('CursorColumn', 'NONE', s:term18)
+call s:hl('CursorLine', 'NONE', s:term18)
+call s:hl('CursorLineNr', s:term10, s:term18)
+call s:hl('ColorColumn', 'NONE', s:term18)
+call s:hl('Cursor', 'NONE', 'NONE', 'reverse')
+hi! link lCursor Cursor
+call s:hl('MatchParen', s:term9, 'NONE', 'bold,underline')
+
+let g:terminal_color_0 = s:term0
+let g:terminal_color_1 = s:term1
+let g:terminal_color_2 = s:term2
+let g:terminal_color_3 = s:term3
+let g:terminal_color_4 = s:term4
+let g:terminal_color_5 = s:term5
+let g:terminal_color_6 = s:term6
+let g:terminal_color_7 = s:term7
+let g:terminal_color_8 = s:term8
+let g:terminal_color_9 = s:term9
+let g:terminal_color_10 = s:term10
+let g:terminal_color_11 = s:term11
+let g:terminal_color_12 = s:term12
+let g:terminal_color_13 = s:term13
+let g:terminal_color_14 = s:term14
+let g:terminal_color_15 = s:term15
+
+" diff filetype
+call s:hl('diffAdded', s:term10, 'NONE')
+call s:hl('diffChanged', s:term11, 'NONE')
+call s:hl('diffRemoved', s:term9, 'NONE')
+
+" Restore background saved.  Must be at the end due to a bug in VIM trying to
+" figuring out automagically if the background set through Normal highlight
+" group is dark or light.
+" https://groups.google.com/forum/#!msg/vim_dev/afPqwAFNdrU/nqh6tOM87QUJ
+exe "set background=" . (s:is_dark ? 'dark' : 'light')
+delfunction s:hl
