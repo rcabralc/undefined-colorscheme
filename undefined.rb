@@ -398,7 +398,7 @@ module Undefined
       @light ||= Palette.new do |palette|
         black = CIELUV.new(0, 0, 0)
         white = CIELUV.new(100, 0, 0)
-        @dark.each do |swatch|
+        dark.each do |swatch|
           palette.add(swatch.color.reflect_l(black, white),
                       swatch.name,
                       *swatch.aliases,
