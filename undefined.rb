@@ -445,7 +445,8 @@ module Undefined
         [0.1, { alias: :term18 }],
         [0.25, { alias: :term8 }],
         [0.38, { alias: :term19 }],
-        [0.5, { alias: :term7, accent: true }]
+        [0.5, { alias: :term7, accent: true }],
+        [0.85, { alias: :term20, alternate: true, foreground: true }],
       ].each_with_index do |(weight, meta), index|
         yield weight, meta, index
       end
