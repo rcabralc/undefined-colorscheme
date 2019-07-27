@@ -3,6 +3,8 @@
     scheme = Undefined.const_get(name)
     palette = scheme.public_send(variant)
     description = variant == 'dark' ? "#{name}Dark" : "#{name}Light"
+    compl_variant = variant == 'dark' ? :light : :dark
+    compl_palette = scheme.public_send(compl_variant)
 %>[ColorEffects:Disabled]
 Color=<%= palette.bg.to_a.join(',') %>
 ColorAmount=0.65
@@ -15,7 +17,7 @@ IntensityEffect=0
 [ColorEffects:Inactive]
 ChangeSelectionColor=false
 Color=<%= palette.bg.to_a.join(',') %>
-ColorAmount=0.025
+ColorAmount=0.15
 ColorEffect=2
 ContrastAmount=0.65
 ContrastEffect=0
@@ -26,8 +28,8 @@ IntensityEffect=0
 [Colors:Button]
 BackgroundAlternate=<%= palette.bg.to_a.join(',') %>
 BackgroundNormal=<%= palette.term18.to_a.join(',') %>
-DecorationFocus=<%= palette.term13.to_a.join(',') %>
-DecorationHover=<%= palette.term11.to_a.join(',') %>
+DecorationFocus=<%= palette.term5.to_a.join(',') %>
+DecorationHover=<%= palette.term13_1.to_a.join(',') %>
 ForegroundActive=<%= palette.term13.to_a.join(',') %>
 ForegroundInactive=<%= palette.term7.to_a.join(',') %>
 ForegroundLink=<%= palette.term14.to_a.join(',') %>
@@ -38,26 +40,26 @@ ForegroundPositive=<%= palette.term10.to_a.join(',') %>
 ForegroundVisited=<%= palette.term12.to_a.join(',') %>
 
 [Colors:Complementary]
-BackgroundAlternate=<%= palette.term18.to_a.join(',') %>
-BackgroundNormal=<%= palette.bg.to_a.join(',') %>
-DecorationFocus=<%= palette.term13.to_a.join(',') %>
-DecorationHover=<%= palette.term11.to_a.join(',') %>
-ForegroundActive=<%= palette.term13.to_a.join(',') %>
-ForegroundInactive=<%= palette.term7.to_a.join(',') %>
-ForegroundLink=<%= palette.term14.to_a.join(',') %>
-ForegroundNegative=<%= palette.term9.to_a.join(',') %>
-ForegroundNeutral=<%= palette.term11.to_a.join(',') %>
-ForegroundNormal=<%= palette.fg.to_a.join(',') %>
-ForegroundPositive=<%= palette.term10.to_a.join(',') %>
-ForegroundVisited=<%= palette.term12.to_a.join(',') %>
+BackgroundAlternate=<%= compl_palette.term18.to_a.join(',') %>
+BackgroundNormal=<%= compl_palette.bg.to_a.join(',') %>
+DecorationFocus=<%= compl_palette.term13.to_a.join(',') %>
+DecorationHover=<%= compl_palette.term5.to_a.join(',') %>
+ForegroundActive=<%= compl_palette.term13.to_a.join(',') %>
+ForegroundInactive=<%= compl_palette.term7.to_a.join(',') %>
+ForegroundLink=<%= compl_palette.term14.to_a.join(',') %>
+ForegroundNegative=<%= compl_palette.term9.to_a.join(',') %>
+ForegroundNeutral=<%= compl_palette.term11.to_a.join(',') %>
+ForegroundNormal=<%= compl_palette.fg.to_a.join(',') %>
+ForegroundPositive=<%= compl_palette.term10.to_a.join(',') %>
+ForegroundVisited=<%= compl_palette.term12.to_a.join(',') %>
 
 [Colors:Selection]
-BackgroundAlternate=<%= palette.term12_3.to_a.join(',') %>
+BackgroundAlternate=<%= palette.term12_1.to_a.join(',') %>
 BackgroundNormal=<%= palette.term12_2.to_a.join(',') %>
-DecorationFocus=<%= palette.term13.to_a.join(',') %>
-DecorationHover=<%= palette.term11.to_a.join(',') %>
-ForegroundActive=<%= palette.term13.to_a.join(',') %>
-ForegroundInactive=<%= palette.term7.to_a.join(',') %>
+DecorationFocus=<%= palette.term5.to_a.join(',') %>
+DecorationHover=<%= palette.term13_1.to_a.join(',') %>
+ForegroundActive=<%= palette.bg.to_a.join(',') %>
+ForegroundInactive=<%= palette.altbg.to_a.join(',') %>
 ForegroundLink=<%= palette.term14.to_a.join(',') %>
 ForegroundNegative=<%= palette.term9.to_a.join(',') %>
 ForegroundNeutral=<%= palette.term11.to_a.join(',') %>
@@ -66,24 +68,24 @@ ForegroundPositive=<%= palette.term10.to_a.join(',') %>
 ForegroundVisited=<%= palette.term12.to_a.join(',') %>
 
 [Colors:Tooltip]
-BackgroundAlternate=<%= palette.term18.to_a.join(',') %>
-BackgroundNormal=<%= palette.bg.to_a.join(',') %>
-DecorationFocus=<%= palette.term13.to_a.join(',') %>
-DecorationHover=<%= palette.term11.to_a.join(',') %>
-ForegroundActive=<%= palette.term13.to_a.join(',') %>
-ForegroundInactive=<%= palette.term7.to_a.join(',') %>
-ForegroundLink=<%= palette.term14.to_a.join(',') %>
-ForegroundNegative=<%= palette.term9.to_a.join(',') %>
-ForegroundNeutral=<%= palette.term11.to_a.join(',') %>
-ForegroundNormal=<%= palette.fg.to_a.join(',') %>
-ForegroundPositive=<%= palette.term10.to_a.join(',') %>
-ForegroundVisited=<%= palette.term12.to_a.join(',') %>
+BackgroundAlternate=<%= compl_palette.term18.to_a.join(',') %>
+BackgroundNormal=<%= compl_palette.bg.to_a.join(',') %>
+DecorationFocus=<%= compl_palette.term13.to_a.join(',') %>
+DecorationHover=<%= compl_palette.term5.to_a.join(',') %>
+ForegroundActive=<%= compl_palette.term13.to_a.join(',') %>
+ForegroundInactive=<%= compl_palette.term7.to_a.join(',') %>
+ForegroundLink=<%= compl_palette.term14.to_a.join(',') %>
+ForegroundNegative=<%= compl_palette.term9.to_a.join(',') %>
+ForegroundNeutral=<%= compl_palette.term11.to_a.join(',') %>
+ForegroundNormal=<%= compl_palette.fg.to_a.join(',') %>
+ForegroundPositive=<%= compl_palette.term10.to_a.join(',') %>
+ForegroundVisited=<%= compl_palette.term12.to_a.join(',') %>
 
 [Colors:View]
 BackgroundAlternate=<%= palette.bg.to_a.join(',') %>
 BackgroundNormal=<%= palette.altbg.to_a.join(',') %>
-DecorationFocus=<%= palette.term13.to_a.join(',') %>
-DecorationHover=<%= palette.term11.to_a.join(',') %>
+DecorationFocus=<%= palette.term5.to_a.join(',') %>
+DecorationHover=<%= palette.term13_1.to_a.join(',') %>
 ForegroundActive=<%= palette.term13.to_a.join(',') %>
 ForegroundInactive=<%= palette.term7.to_a.join(',') %>
 ForegroundLink=<%= palette.term14.to_a.join(',') %>
@@ -96,8 +98,8 @@ ForegroundVisited=<%= palette.term12.to_a.join(',') %>
 [Colors:Window]
 BackgroundAlternate=<%= palette.term18.to_a.join(',') %>
 BackgroundNormal=<%= palette.bg.to_a.join(',') %>
-DecorationFocus=<%= palette.term13.to_a.join(',') %>
-DecorationHover=<%= palette.term11.to_a.join(',') %>
+DecorationFocus=<%= palette.term5.to_a.join(',') %>
+DecorationHover=<%= palette.term13_1.to_a.join(',') %>
 ForegroundActive=<%= palette.term13.to_a.join(',') %>
 ForegroundInactive=<%= palette.term7.to_a.join(',') %>
 ForegroundLink=<%= palette.term14.to_a.join(',') %>
