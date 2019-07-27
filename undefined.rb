@@ -360,6 +360,7 @@ module Undefined
 
   class Scheme
     def initialize(bg, fg, **colors)
+      raise ArgumentError, "define exactly six colors" if colors.size != 6
       @bg = bg
       @fg = fg
       @colors = colors
@@ -372,19 +373,14 @@ module Undefined
         dark.add(@bg.blend(@fg, -0.06), :altbg, :term16, background: true, alternate: true)
         @colors.each.with_index do |(name, color), index|
           color1 = color.blend(@bg, 0.25)
-          color2 = color.blend(@bg, 0.65)
-          color3 = color.blend(@bg, 0.75)
-          if index < 7
-            dark.add(color, :"#{name}0", :"term#{index + 9}", accent: true)
-            dark.add(color1, :"#{name}1", :"term#{index + 1}", accent: true)
-            dark.add(color2, :"#{name}2", :"term#{index + 9}_2", background: true)
-            dark.add(color3, :"#{name}3", :"term#{index + 9}_3", background: true, alternate: true)
-          else
-            dark.add(color, :"#{name}0", :"term#{index + 13}", accent: true)
-            dark.add(color1, :"#{name}1", :"term#{index + 13}_1", accent: true)
-            dark.add(color2, :"#{name}2", :"term#{index + 13}_2", background: true)
-            dark.add(color3, :"#{name}3", :"term#{index + 13}_3", background: true, alternate: true)
-          end
+          bg1 = color.blend(@bg, 0.50)
+          bg2 = color.blend(@bg, 0.63)
+          bg3 = color.blend(@bg, 0.75)
+          dark.add(color, :"#{name}0", :"term#{index + 9}", accent: true)
+          dark.add(color1, :"#{name}1", :"term#{index + 1}", accent: true)
+          dark.add(bg1, :"#{name}2", :"term#{index + 9}_1", background: true)
+          dark.add(bg2, :"#{name}2", :"term#{index + 9}_2", background: true)
+          dark.add(bg3, :"#{name}3", :"term#{index + 9}_3", background: true, alternate: true)
         end
         grayscale do |weight, meta, index|
           color = @bg.blend(@fg, weight)
