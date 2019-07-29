@@ -471,14 +471,14 @@ module Undefined
   end
 
   Undefined = Scheme.new(
-    CIELUV.new(15, 6, 8),
-    CIELUV.new(85, 11, 6),
-    red: CIELUV.new(56, 142, 27),
+    CIELUV.new(13, 6, 8),
+    CIELUV.new(87, 11, 6),
+    red: CIELUV.new(56, 143, 30),
     lime: CIELUV.new(56, -7, 50),
     yellow: CIELUV.new(56, 47, 20),
     purple: CIELUV.new(56, 97, -9),
-    orange: CIELUV.new(56, 100, 37),
-    cyan: CIELUV.new(56, -35, 3),
+    orange: CIELUV.new(56, 85, 38),
+    cyan: CIELUV.new(56, -31, -25),
   )
 
   def self.dark
