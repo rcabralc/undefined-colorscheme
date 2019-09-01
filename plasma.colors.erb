@@ -3,8 +3,9 @@
     scheme = Undefined.const_get(name)
     palette = scheme.public_send(variant)
     description = variant == 'dark' ? "#{name}Dark" : "#{name}Light"
-    compl_variant = variant == 'dark' ? :light : :dark
-    compl_palette = scheme.public_send(compl_variant)
+    tooltip_variant = variant == 'dark' ? :light : :dark
+    tooltip_palette = scheme.public_send(tooltip_variant)
+    compl_palette = scheme.dark
 %>[ColorEffects:Disabled]
 Color=<%= palette.bg.to_a.join(',') %>
 ColorAmount=0.65
@@ -39,20 +40,6 @@ ForegroundNormal=<%= palette.fg.to_a.join(',') %>
 ForegroundPositive=<%= palette.term10.to_a.join(',') %>
 ForegroundVisited=<%= palette.term12.to_a.join(',') %>
 
-[Colors:Complementary]
-BackgroundAlternate=<%= compl_palette.term18.to_a.join(',') %>
-BackgroundNormal=<%= compl_palette.bg.to_a.join(',') %>
-DecorationFocus=<%= compl_palette.term13.to_a.join(',') %>
-DecorationHover=<%= compl_palette.term5.to_a.join(',') %>
-ForegroundActive=<%= compl_palette.term13.to_a.join(',') %>
-ForegroundInactive=<%= compl_palette.term7.to_a.join(',') %>
-ForegroundLink=<%= compl_palette.term14.to_a.join(',') %>
-ForegroundNegative=<%= compl_palette.term9.to_a.join(',') %>
-ForegroundNeutral=<%= compl_palette.term11.to_a.join(',') %>
-ForegroundNormal=<%= compl_palette.fg.to_a.join(',') %>
-ForegroundPositive=<%= compl_palette.term10.to_a.join(',') %>
-ForegroundVisited=<%= compl_palette.term12.to_a.join(',') %>
-
 [Colors:Selection]
 BackgroundAlternate=<%= palette.term12_2.to_a.join(',') %>
 BackgroundNormal=<%= palette.term12_1.to_a.join(',') %>
@@ -68,18 +55,18 @@ ForegroundPositive=<%= palette.term10.to_a.join(',') %>
 ForegroundVisited=<%= palette.term12_3.to_a.join(',') %>
 
 [Colors:Tooltip]
-BackgroundAlternate=<%= compl_palette.term18.to_a.join(',') %>
-BackgroundNormal=<%= compl_palette.bg.to_a.join(',') %>
-DecorationFocus=<%= compl_palette.term13.to_a.join(',') %>
-DecorationHover=<%= compl_palette.term5.to_a.join(',') %>
-ForegroundActive=<%= compl_palette.term13.to_a.join(',') %>
-ForegroundInactive=<%= compl_palette.term7.to_a.join(',') %>
-ForegroundLink=<%= compl_palette.term14.to_a.join(',') %>
-ForegroundNegative=<%= compl_palette.term9.to_a.join(',') %>
-ForegroundNeutral=<%= compl_palette.term11.to_a.join(',') %>
-ForegroundNormal=<%= compl_palette.fg.to_a.join(',') %>
-ForegroundPositive=<%= compl_palette.term10.to_a.join(',') %>
-ForegroundVisited=<%= compl_palette.term12.to_a.join(',') %>
+BackgroundAlternate=<%= tooltip_palette.term18.to_a.join(',') %>
+BackgroundNormal=<%= tooltip_palette.bg.to_a.join(',') %>
+DecorationFocus=<%= tooltip_palette.term13.to_a.join(',') %>
+DecorationHover=<%= tooltip_palette.term5.to_a.join(',') %>
+ForegroundActive=<%= tooltip_palette.term13.to_a.join(',') %>
+ForegroundInactive=<%= tooltip_palette.term7.to_a.join(',') %>
+ForegroundLink=<%= tooltip_palette.term14.to_a.join(',') %>
+ForegroundNegative=<%= tooltip_palette.term9.to_a.join(',') %>
+ForegroundNeutral=<%= tooltip_palette.term11.to_a.join(',') %>
+ForegroundNormal=<%= tooltip_palette.fg.to_a.join(',') %>
+ForegroundPositive=<%= tooltip_palette.term10.to_a.join(',') %>
+ForegroundVisited=<%= tooltip_palette.term12.to_a.join(',') %>
 
 [Colors:View]
 BackgroundAlternate=<%= palette.bg.to_a.join(',') %>
@@ -108,6 +95,20 @@ ForegroundNeutral=<%= palette.term11.to_a.join(',') %>
 ForegroundNormal=<%= palette.fg.to_a.join(',') %>
 ForegroundPositive=<%= palette.term10.to_a.join(',') %>
 ForegroundVisited=<%= palette.term12.to_a.join(',') %>
+
+[Colors:Complementary]
+BackgroundAlternate=<%= compl_palette.term18.to_a.join(',') %>
+BackgroundNormal=<%= compl_palette.bg.to_a.join(',') %>
+DecorationFocus=<%= compl_palette.term13.to_a.join(',') %>
+DecorationHover=<%= compl_palette.term5.to_a.join(',') %>
+ForegroundActive=<%= compl_palette.term13.to_a.join(',') %>
+ForegroundInactive=<%= compl_palette.term7.to_a.join(',') %>
+ForegroundLink=<%= compl_palette.term14.to_a.join(',') %>
+ForegroundNegative=<%= compl_palette.term9.to_a.join(',') %>
+ForegroundNeutral=<%= compl_palette.term11.to_a.join(',') %>
+ForegroundNormal=<%= compl_palette.fg.to_a.join(',') %>
+ForegroundPositive=<%= compl_palette.term10.to_a.join(',') %>
+ForegroundVisited=<%= compl_palette.term12.to_a.join(',') %>
 
 [General]
 ColorScheme=<%= description %>
