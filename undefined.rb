@@ -61,8 +61,16 @@ module Undefined
       self.class.new(*zip(other).map { |(c1, c2)| c1 * selfweight + c2 * weight })
     end
 
-    def reflect_l(dark, light)
-      self.class.new(light.l - @l + dark.l, @u, @v)
+    def invert_light
+      self.class.new(100 - @l, @u, @v)
+    end
+
+    def decrement_light(by: 1)
+      self.class.new([0, @l - by].max, @u, @v)
+    end
+
+    def increment_light(by: 1)
+      self.class.new([100, @l + by].min, @u, @v)
     end
 
     def srgb
@@ -73,8 +81,27 @@ module Undefined
       xyz.y/100.0
     end
 
+    def contrast_ratio(other)
+      [relative_luminance, other.relative_luminance]
+        .sort.reverse.map { |y| y + 0.05 }.reduce(&:'/')
+    end
+
     def inspect
       "CIE L*u*v* (#{to_a.join(',')})"
+    end
+
+    def find(mix, min: 0.0, max: 1.0, epsilon: 0.005, &block)
+      raise ArgumentError, "bad limits: #{min}, #{max}" if min.negative? || max > 1 || min >= max
+      raise ArgumentError, "bad epsilon: #{epsilon}" if epsilon.negative?
+      factor = (max + min)/2.0
+      blended = blend(mix, factor)
+      delta = yield(blended)
+      return blended if delta.abs <= epsilon
+      if delta.positive?
+        find(mix, min: factor, max: max, epsilon: epsilon, &block)
+      else
+        find(mix, min: min, max: factor, epsilon: epsilon, &block)
+      end
     end
 
   private
@@ -178,6 +205,11 @@ module Undefined
         .row(1).zip(self).map { |(coeff, coord)| coeff * coord }.reduce(&:+)
     end
 
+    def contrast_ratio(other)
+      [relative_luminance, other.relative_luminance]
+        .sort.reverse.map { |y| y + 0.05 }.reduce(&:'/')
+    end
+
     def blend(other, weight)
       selfweight = 1.0 - weight
       self.class.new(*zip(other).map { |(c1, c2)| c1 * selfweight + c2 * weight })
@@ -218,6 +250,10 @@ module Undefined
       linear.relative_luminance
     end
 
+    def contrast_ratio(other)
+      linear.contrast_ratio(other.linear)
+    end
+
     def blend(other, weight)
       linear.blend(other.linear, weight).srgb
     end
@@ -249,19 +285,19 @@ module Undefined
   class Palette
     include Enumerable
 
-    def initialize
-      raise ArgumentError, 'a block is required' unless block_given?
+    def initialize(bg, fg, bases)
       @swatches = []
-      yield self
+      add(bg.blend(fg, -0.06), :altbg, :term16, background: true, alternate: true)
+      add(bg, :bg, :term0, background: true)
+      add(bg.blend(fg, 0.05), :gray0, :term17, alternate: true, background: true)
+      add(bg.blend(fg, 0.1), :gray1, :term18)
+      add(bg.blend(fg, 0.25), :gray2, :term8)
+      add(bg.blend(fg, 0.38), :gray3, :term19)
+      add(bg.blend(fg, 0.5), :gray4, :term7, accent: true)
+      add(bg.blend(fg, 0.85), :gray5, :term20, alternate: true, foreground: true)
+      add(fg, :fg, :term15, foreground: true)
+      bases.each.with_index { |(name, color), index| compose(bg, fg, name, index, color) }
       freeze
-    end
-
-    def add(color, name, *aliases, **meta)
-      index = @swatches.size
-      swatch = Swatch.new(self, index, color, name, *aliases, **meta)
-      @swatches << swatch
-      define_singleton_method(name) { swatch }
-      aliases.each { |a| define_singleton_method(a) { swatch } }
     end
 
     def get(name)
@@ -270,6 +306,30 @@ module Undefined
 
     def each(&block)
       @swatches.each(&block)
+    end
+
+  private
+
+    def compose(bg, fg, name, index, color)
+      color1 = color.find(bg) do |blended|
+        blended.contrast_ratio(bg) - blended.contrast_ratio(fg)
+      end
+      bg1 = color.blend(bg, 0.50)
+      bg2 = color.blend(bg, 0.63)
+      bg3 = color.blend(bg, 0.75)
+      add(color, :"#{name}0", :"term#{index + 9}", accent: true)
+      add(color1, :"#{name}1", :"term#{index + 1}", accent: true)
+      add(bg1, :"#{name}2", :"term#{index + 9}_1", background: true)
+      add(bg2, :"#{name}2", :"term#{index + 9}_2", background: true)
+      add(bg3, :"#{name}3", :"term#{index + 9}_3", background: true, alternate: true)
+    end
+
+    def add(color, name, *aliases, **meta)
+      index = @swatches.size
+      swatch = Swatch.new(self, index, color, name, *aliases, **meta)
+      @swatches << swatch
+      define_singleton_method(name) { swatch }
+      aliases.each { |a| define_singleton_method(a) { swatch } }
     end
   end
 
@@ -367,42 +427,21 @@ module Undefined
     end
 
     def dark
-      @dark ||= Palette.new do |dark|
-        dark.add(@bg, :bg, :term0, background: true)
-        dark.add(@fg, :fg, :term15, foreground: true)
-        dark.add(@bg.blend(@fg, -0.06), :altbg, :term16, background: true, alternate: true)
-        @colors.each.with_index do |(name, color), index|
-          color1 = color.blend(@bg, 0.25)
-          bg1 = color.blend(@bg, 0.50)
-          bg2 = color.blend(@bg, 0.63)
-          bg3 = color.blend(@bg, 0.75)
-          dark.add(color, :"#{name}0", :"term#{index + 9}", accent: true)
-          dark.add(color1, :"#{name}1", :"term#{index + 1}", accent: true)
-          dark.add(bg1, :"#{name}2", :"term#{index + 9}_1", background: true)
-          dark.add(bg2, :"#{name}2", :"term#{index + 9}_2", background: true)
-          dark.add(bg3, :"#{name}3", :"term#{index + 9}_3", background: true, alternate: true)
-        end
-        grayscale do |weight, meta, index|
-          color = @bg.blend(@fg, weight)
-          alias_ = meta.delete(:alias)
-          dark.add(color, :"gray#{index}", alias_, **meta)
-        end
-      end
+      @dark ||= Palette.new(@bg, @fg, @colors)
     end
 
     def light
-      @light ||= Palette.new do |palette|
+      @light ||= begin
+        bg = @bg.invert_light
+        fg = @fg.invert_light
         black = CIELUV.new(0, 0, 0)
-        white = CIELUV.new(100, 0, 0)
-        dark.each do |swatch|
-          palette.add(swatch.color.reflect_l(black, white),
-                      swatch.name,
-                      *swatch.aliases,
-                      background: swatch.background?,
-                      foreground: swatch.foreground?,
-                      accent: swatch.accent?,
-                      alternate: swatch.alternate?)
+        colors = @colors.map do |(k, v)|
+          color = v.invert_light.find(black) do |blended|
+            v.contrast_ratio(@bg) - blended.contrast_ratio(bg)
+          end
+          [k, color]
         end
+        Palette.new(bg, fg, colors.to_h)
       end
     end
 
@@ -432,29 +471,13 @@ module Undefined
         end
       end
     end
-
-  private
-
-    def grayscale(&block)
-      [
-        [0.05, { alias: :term17, alternate: true, background: true }],
-        [0.1, { alias: :term18 }],
-        [0.25, { alias: :term8 }],
-        [0.38, { alias: :term19 }],
-        [0.5, { alias: :term7, accent: true }],
-        [0.85, { alias: :term20, alternate: true, foreground: true }],
-      ].each_with_index do |(weight, meta), index|
-        yield weight, meta, index
-      end
-    end
   end
 
   class ContrastRatio
     include Comparable
 
     def initialize(color1, color2)
-      @value = [color1.relative_luminance, color2.relative_luminance]
-        .sort.reverse.map { |y| y + 0.05 }.reduce(&:'/')
+      @value = color1.contrast_ratio(color2)
     end
 
     def <=>(other)
