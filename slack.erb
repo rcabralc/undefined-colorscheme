@@ -2,4 +2,4 @@
     require_relative "./#{name.downcase}"
     scheme = Undefined.const_get(name)
     method = scheme.public_send(variant).method(:get)
-%><%= [:bg, :term18, :term12_2, :fg, :term8, :fg, :term10, :term9].map(&method).join(', ') %>
+%><%= [:bg, :term18, :term12_2, :fg, :term19, :fg, :term10, :term9].map(&method).join(', ') %>

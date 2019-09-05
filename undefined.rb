@@ -291,9 +291,10 @@ module Undefined
       add(bg, :bg, :term0, background: true)
       add(bg.blend(fg, 0.05), :gray0, :term17, alternate: true, background: true)
       add(bg.blend(fg, 0.1), :gray1, :term18)
-      add(bg.blend(fg, 0.25), :gray2, :term8)
-      add(bg.blend(fg, 0.38), :gray3, :term19)
-      add(bg.blend(fg, 0.5), :gray4, :term7, accent: true)
+      add(bg.blend(fg, 0.3), :gray2, :term19)
+      add(bg.blend(fg, 0.5), :gray3, :term8)
+      add(bg.find(fg) { |blended| 4.75 - blended.contrast_ratio(bg) }, :gray4, :term7,
+          accent: true)
       add(bg.blend(fg, 0.85), :gray5, :term20, alternate: true, foreground: true)
       add(fg, :fg, :term15, foreground: true)
       bases.each.with_index { |(name, color), index| compose(bg, fg, name, index, color) }
